@@ -1,4 +1,5 @@
 *.log
 trunk/upload
 trunk/filestore
+trunk/.svn
 include/config.php
