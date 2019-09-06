@@ -9,9 +9,13 @@ $createData=false;
 
 # Use the below to set which tables we will extract data for - empty array means all tables.
 #$dataFor=array("usergroup","resource_type_field","site_text","user","collection","user_collection","report","preview_size","resource_type");
-$dataFor=array();
-$tableFor=array();
-$indicesFor=array();
+// $dataFor=array();
+// $tableFor=array();
+// $indicesFor=array();
+// added by SAn after adding LibraryLink tables
+$dataFor=array("librarylink_link","librarylink_log");
+$tableFor=array("librarylink_link","librarylink_log");
+$indicesFor=array("librarylink_link","librarylink_log");
 
 if (getval("execute","")!="" && enforcePostRequest(false))
 	{
