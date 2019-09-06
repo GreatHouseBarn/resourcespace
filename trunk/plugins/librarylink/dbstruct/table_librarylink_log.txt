@@ -1,0 +1,8 @@
+id,"int(10) unsigned",NO,PRI,,auto_increment
+ref,int(11),NO,,,
+xgkey,varchar(255),NO,,,
+xgtype,varchar(255),NO,,,
+xgrank,"int(10) unsigned",NO,,,
+operation,varchar(255),NO,,,
+user,varchar(255),NO,,,
+time,datetime,NO,,,

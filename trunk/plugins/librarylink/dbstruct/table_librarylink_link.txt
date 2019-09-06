@@ -1,0 +1,6 @@
+id,"int(10) unsigned",NO,PRI,,auto_increment
+ref,int(11),NO,MUL,,
+xgkey,varchar(255),NO,MUL,,
+xgtype,varchar(255),NO,MUL,,
+xgrank,"int(10) unsigned",NO,MUL,,
+label,varchar(255),NO,,,

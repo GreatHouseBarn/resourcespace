@@ -1,0 +1,281 @@
+./plugins/propose_changes/pages/propose_changes.php:513:    if (!hook('replacefield', '', array($field['type'], $field['ref'], $n)))
+./plugins/resource_tools_compact/hooks/view.php:5:      $newHeadline=hook('replacesizelabel', '', array($ref, $resource, $sizes[$n]));
+./plugins/resource_tools_compact/hooks/view.php:368:            hook('aftersharelink', '', array($ref, $search, $offset, $order_by, $sort, $archive));
+./plugins/transform/pages/crop.php:83:hook('transformcropbeforegetsize');
+./plugins/auto_group/pages/new_group.php:106:   <?php if (!hook('replacesubmitbuttons')) { ?>
+./login.php:317:hook('afterlogin');
+./batch/cron_jobs/999_file_integrity_check.php:54:    if(!hook('file_integrity_check','',array($resource)))
+./batch/create_previews.php:241:                        hook('after_batch_create_preview');
+./include/job_handlers/collection_download.php:97:    $new_file = hook('replacedownloadfile', '', array($collection_resources[$n], $usesize, $pextension, $target_exists));
+./include/job_handlers/collection_download.php:167:    hook('modifydownloadfile');
+./include/reporting_functions.php:7:    $customName = hook('customreportname', '', array($report));
+./include/reporting_functions.php:26:        if (!hook('ignorereport', '', array($r[$n])))
+./include/reporting_functions.php:88:                $custom = hook('customreportfield', '', array($result, $key, $value, $download));
+./include/reporting_functions.php:150:                    $custom = hook('customreportfield', '', array($result, $key, $value, $download));
+./include/plugin_functions.php:537:                hook('custom_config_post', '', array($def, $config, $omit, $config_global));
+./include/plugin_functions.php:1322:    $plugincss.=hook('moreplugincss','',array($plugins, $n));
+./include/header.php:54:<?php hook('extra_meta'); ?>
+./include/header.php:338:hook('responsiveheader');
+./include/header.php:340:if(!hook('replace_header_text_logo'))
+./include/header.php:436:    if(!hook('replaceheaderfullnamelink'))
+./include/request_functions.php:302:    $amendedmessage=hook('amend_request_message','', array($userref, $ref, isset($collectiondata) ? $collectiondata : array(), $message, isset($collectiondata)));
+./include/request_functions.php:499:    $amendedmessage=hook('amend_request_message','', array($userref, $ref, isset($collectiondata) ? $collectiondata : array(), $message, isset($collectiondata)));
+./include/request_functions.php:518:    hook('autoassign_individual_requests', '', array($userref, $ref, $message, isset($collectiondata)));
+./include/request_functions.php:571:    hook('autoassign_collection_requests', '', array($userref, isset($collectiondata) ? $collectiondata : array(), $message, isset($collectiondata)));
+./include/request_functions.php:754:        if(hook('bypass_end_managed_collection_request', '', array(!isset($collectiondata), $ref, $request_query, $message, $templatevars, $assigned_to_user, $admin_mail_template, $user_mail_template)))
+./include/search_functions.php:823:    $modified_options = hook('render_search_actions_add_option','',array($options));
+./include/search_functions.php:1295:        $collectionsearchsql=hook('modifycollectionsearchsql','',array($searchsql));
+./include/search_functions.php:1314:        hook('beforereturnresults', '', array($result, $archive));
+./include/search_title_processing.php:123:            if (!hook('collectionaccessmode'))
+./include/search_title_processing.php:355:    hook('add_search_title_links');
+./include/image_processing.php:26:    if(!$after_upload_processing && !(checkperm('c') || checkperm('d') || hook('upload_file_permission_check_override')))
+./include/image_processing.php:1343:    hook('afterpreviewcreation', '',array($ref, $alternative));
+./include/image_processing.php:1716:            if (($id == "hpr" && !($extension=="jpg" || $extension=="jpeg")) || $previews_allow_enlarge || ($id == "scr" && !($extension=="jpg" || $extension=="jpeg")) || ($sw>$tw) || ($sh>$th) || ($id == "pre") || ($id=="thm") || ($id=="col") || in_array($id,$always_make_previews) || hook('force_preview_creation','',array($ref, $ps, $n, $alternative)))
+./include/image_processing.php:2104:            $modified_mpr_command=hook('modify_mpr_command','',array($command,$ref,$extension));
+./include/image_processing.php:2124:        hook('afterpreviewcreation', '',array($ref, $alternative));
+./include/image_processing.php:3062:    if(!(checkperm('c') || checkperm('d') || hook('upload_file_permission_check_override')))
+./include/edit_upload_options.php:190:                        if (!hook('collectionaccessmode')) {
+./include/preview_preprocessing.php:684:    if(!hook('previewpskipthumb', '', array($file)))
+./include/collections_functions.php:172:    $plugin_collection_resources=hook('replace_get_collection_resources');
+./include/collections_functions.php:755:        if (!hook('modifysavecollection'))
+./include/collections_functions.php:1506:               $modifyNotAdded = hook('modifynotaddedsearchitems', '', array($results, $resourcesnotadded));
+./include/collections_functions.php:1582:       if(hook('denyaftermultiedit', '', array($collection))) { return false; }
+./include/collections_functions.php:1598:       $images_override=hook('get_theme_image_override','', array($themes, $collection, $smart));
+./include/collections_functions.php:1920:       hook('aftercopycollection','',array($copied,$current));
+./include/collections_functions.php:2742:    $modified_options = hook('render_actions_add_collection_option', '', array($top_actions,$options,$collection_data));
+./include/collections_functions.php:2886:    $plugin_last_resource_edit=hook('override_last_resource_edit');
+./include/collections_functions.php:3304:    $filename = hook('changecollectiondownloadname', null, array($collection, $size, $suffix));
+./include/dash_tile_generation.php:455:        $modifiedurl=hook('searchpublicmodifyurl');
+./include/dash_tile_generation.php:613:         $preview_resource_mod=hook('modify_promoted_image_preview_resource_data','',array($promoted_image));
+./include/resource_functions.php:627:    if (!hook('forbidsavearchive', '', array($errors)))
+./include/resource_functions.php:706:    hook('aftersaveresourcedata', '', array($ref, $nodes_to_add, $nodes_to_remove, $autosave_field));
+./include/resource_functions.php:810:           if('' != getval('editthis_field_' . $fields[$n]['ref'], '') || hook('save_resource_data_multi_field_decision', '', array($fields[$n]['ref'])))
+./include/resource_functions.php:1181:                    $hookval = hook('save_resource_data_multi_extra_modes', '', array($ref, $fields[$n]));
+./include/resource_functions.php:1310:            if (!hook('forbidsavearchive', '', array($errors)))
+./include/resource_functions.php:1429:    hook('aftersaveresourcedata', '', array($list, $all_nodes_to_add, $all_nodes_to_remove, $autosave_field=''));
+./include/resource_functions.php:2005:                !hook('check_single_delete')
+./include/resource_functions.php:2354:    $extrafields = hook('get_resource_log_extra_fields');
+./include/resource_functions.php:2887:            if(!hook('update_resource_replace_ingest','',array($r, $path, $extension)))
+./include/resource_functions.php:3003:  hook('after_update_resource', '', array("resourceId" => $r ));
+./include/resource_functions.php:3778:  hook('edit_resource_external_access','',array($key,$access,$expires,$group));
+./include/resource_functions.php:3860:    $plugincustomeditaccess = hook('customediteaccess','',array($resource,$status,$resourcedata));
+./include/resource_functions.php:4151:        $run_autocomplete_macro = $force_run || hook('run_autocomplete_macro');
+./include/resource_functions.php:4835:    hook('after_update_archive_status', '', array($resource, $archive,$existingstates));
+./include/resource_functions.php:5460:    $replace_extension = hook('replacedownloadextension', '', array($resource, $pextension));
+./include/resource_functions.php:5485:    $plugin_last_resource_edit = hook('override_last_resource_edit_array');
+./include/search_do.php:178:    $modified_keywords=hook('dosearchmodifykeywords', '', array($keywords, $search));
+./include/search_do.php:223:    $modified_select=hook('modifyselect');
+./include/search_do.php:226:    $modified_select2=hook('modifyselect2');
+./include/search_do.php:550:                    if(!$quoted_string && !$keywordprocessed && !($field_short_name_specified && hook('customsearchkeywordfilter', null, array($kw)))) // Need this also for string matching in a named text field
+./include/search_do.php:1617:    hook('zero_search_results');
+./include/dash_functions.php:62:        hook('after_create_dash_tile', '', array($tile));
+./include/dash_functions.php:148:       hook('after_update_dash_tile');
+./include/dash_functions.php:166:       hook('after_delete_dash_tile', '', array($tile, $cascade , $force));
+./include/footer.php:762:       hook('afteruilayout');
+./include/search_public.php:35:            $modifiedurl=hook('searchpublicmodifyurl');
+./include/general.php:356:            elseif(!hook('replace_upload_template_creation', '', array($ref)))
+./include/general.php:447:                read_only" . hook('add_resource_type_field_column') . "
+./include/general.php:451:    $modified_rtf_query=hook('modify_rtf_query','', array($field, $rtf_query));
+./include/general.php:1526:    $return = sql_query("SELECT ref,name,permissions,parent,search_filter,search_filter_id,edit_filter,ip_restrict,resource_defaults,config_options,welcome_message,request_mode,allow_registration_selection,derestrict_filter,group_specific_logo,inherit_flags" . hook('get_usergroup_add_columns') . " FROM usergroup WHERE ref='$ref'");
+./include/general.php:1645:        $additional_sql = hook('additionaluserfieldssave');
+./include/general.php:4857:    $try=hook('plugin_nopreview_icon','',array($resource_type,$col, $extension));
+./include/general.php:5057:    hook('afterfilesize_unlimited', '', array($path));
+./include/general.php:5871:            return escapeshellarg($checked_path) . hook('executable_add', '', array($path, $executable, $checked_path, $check_exe));
+./include/general.php:5882:                return escapeshellarg($checked_path) . hook('executable_add', '', array($path, $executable, $checked_path, $check_exe));
+./include/general.php:5895:            return escapeshellarg($checked_path) . hook('executable_add', '', array($path, $executable, $checked_path, $check_exe));
+./include/general.php:6703:        if(!hook('customdownloadidonly', '', array($ref, $ext, $alternative))) {
+./include/db.php:85:    hook('after_error_handler', '', array($errno, $errstr, $errfile, $errline));
+./include/db.php:430:        && !hook('modified_cors_process')
+./include/render_functions.php:429:                    if(!hook('rendersearchchkboxes'))
+./include/render_functions.php:764:        hook('render_sort_order_add_option', '', array($options));
+./include/render_functions.php:829:    if(hook('prevent_running_render_actions'))
+./include/render_functions.php:895:            $modify_actions_array = hook('modify_unified_dropdown_actions_options', '', array($actions_array,$top_actions));
+./include/render_functions.php:958:                             $add_to_options = hook('after_render_dropdown_option', '', array($actions_array, $a));
+./include/render_functions.php:1053:            $extra_options_js_case = hook('render_actions_add_option_js_case');
+./include/render_functions.php:1460:        || hook('edithidefield', '', array('field' => $field))
+./include/render_functions.php:1461:        || hook('edithidefield2', '', array('field' => $field)));
+./include/render_functions.php:1802:    if(!hook('replacefield', '', array($field['type'], $field['ref'], $n)))
+./include/render_functions.php:1935:  hook('afterfielddisplay', '', array($n, $field));
+./include/render_functions.php:2482:    if(!hook('replaceemailaccessselector')): ?>
+./include/render_functions.php:2501:    if(!hook('replaceemailexpiryselector'))
+./include/authenticate.php:46:if (array_key_exists("user",$_COOKIE) || array_key_exists("user",$_GET) || isset($anonymous_login) || hook('provideusercredentials'))
+./include/authenticate.php:81:  hook('provideusercredentials');
+./include/authenticate.php:244: if (!hook('iprestrict'))
+./include/authenticate.php:368:hook('handleuserref','',array($userref));
+./pages/themes.php:349:                         <?php hook('beforecollectiontoolscolumn');
+./pages/themes.php:371:                    hook('render_themes_list_tools', '', array($getthemes[$m])); ?>
+./pages/themes.php:480:hook('themestext')
+./pages/themes.php:488:if(!hook('replacethemesbacklink'))
+./pages/themes.php:533:    } # end hook('replacethemesbacklink')
+./pages/themes.php:767:                         <td><div class="ListTitle"><a href="<?php echo $headerlink ?>" onClick="return CentralSpaceLoad(this,true);"><?php echo htmlspecialchars(i18n_get_translated(str_replace("*","",$headers[$n])))?></a><?php hook('addthemeheadertoolaftername')?></div></td>
+./pages/themes.php:768:                         <td><div class="ListTools"><?php hook('addthemeheadertool')?><?php if (!hook("replacethemeselectlink")){?><a href="<?php echo $link ?>" onClick="return CentralSpaceLoad(this,true);"><?php echo LINK_CARET ?><?php echo $linklang;?></a><?php }
+./pages/themes.php:1106:                    hook('additionalsmartthemetool');
+./pages/dash_tile.php:194:              hook('before_dash_tile_save_redirect');
+./pages/dash_tile.php:566:    if($promoted_resource && allowPromotedResources($tile_type) && !hook('replace_promoted_resource_selector'))
+./pages/dash_tile.php:654:      hook('beforedashtileadmin');
+./pages/delete.php:9:if ((isset($allow_resource_deletion) and !$allow_resource_deletion) or (checkperm('D') and !hook('check_single_delete'))){
+./pages/collection_public.php:221:            hook('render_collections_public_list_tools', '', array($collections[$n]));
+./pages/resource_collection_list.php:68:<?php hook('beforecollectiontoolscolumn'); ?>
+./pages/resource_collection_list.php:72:                hook('render_resource_collection_list_list_tools', '', array($collections[$n]));
+./pages/terms.php:78:           $modified_termstext=hook('modified_termstext');
+./pages/terms.php:104:               <?php hook('terms_save_input_attributes', '', array($ref, $url)); ?>/>
+./pages/search_advanced.php:409:if(!hook('advsearchallfields'))
+./pages/search_advanced.php:420:if(!hook('advsearchresid') && trim($search) === "")
+./pages/search_advanced.php:434:if(!hook('advsearchdate'))
+./pages/search_advanced.php:485:hook('advsearchaddfields');
+./pages/collection_manage.php:230:hook('customcollectionmanage');
+./pages/collection_manage.php:340:if (!hook('collectionaccessmode')) {
+./pages/collection_manage.php:358:<?php hook('beforecollectiontoolscolumn'); ?>
+./pages/collection_manage.php:362:              hook('legacy_list_tools', '', array($collections[$n]));
+./pages/collection_manage.php:422:<?php if (!$public_collections_header_only && $enable_public_collections && !hook('replacecollectionmanagepublic')){?>
+./pages/collection_manage.php:430:<?php if(!hook('replacecollectionmanageshared'))
+./pages/csv_export_results_metadata.php:29:    if (!hook('csvreplaceheader'))
+./pages/edit.php:545:                if (!hook('redirectaftersave') && !$modal)
+./pages/edit.php:1051:      if (!hook('replacebacklink') && !$modal && !$upload_review_mode)
+./pages/edit.php:1085:      hook('custompermshowfile');
+./pages/edit.php:1086:      if(((!$is_template && !checkperm('F*')) || $custompermshowfile) && !hook('replaceeditpreview'))
+./pages/edit.php:1594:hook('editbeforesectionhead');
+./pages/edit.php:1611:<?php hook('addcollapsiblesection');
+./pages/edit.php:2131:if(!hook('replacesubmitbuttons'))
+./pages/edit.php:2149:hook('aftereditcollapsiblesection');
+./pages/edit.php:2183:if (isset($show_error) && isset($save_errors) && is_array($save_errors) && !hook('replacesaveerror'))
+./pages/view.php:391:           $modified_value = hook('display_field_modified_value', '', array($field));
+./pages/view.php:401:                   $value_mod_after_highlight=hook('value_mod_after_highlight', '', array($field,$value));
+./pages/view.php:458:                           $value_mod_after_highlight=hook('value_mod_after_highlight', '', array($field,$value));
+./pages/view.php:680:if(!hook('replaceviewtitle'))
+./pages/view.php:692:<?php hook('renderbeforeresourceview', '', array('resource' => $resource));
+./pages/view.php:886:    hook('aftersearchimg', '', array($ref));
+./pages/view.php:900:    hook('previewextras');
+./pages/view.php:1122:    hook('aftersearchimg', '', array($ref));
+./pages/view.php:1141:$disable_flag = (hook('disable_flag_for_renderbeforerecorddownload') || ($use_pdfjs_viewer && $resource['file_extension'] == 'pdf') );
+./pages/view.php:1150:  if (!hook('replaceresourcetoolsheader')) {
+./pages/view.php:1216:    if (!hook('replacemp'))
+./pages/view.php:1376:          $newHeadline=hook('replacesizelabel', '', array($ref, $resource, $sizes[$n]));
+./pages/view.php:1494:  hook('beforenodownloadresult');
+./pages/view.php:1527:          if(!hook('resourcerequest'))
+./pages/view.php:1564:hook('additionalresourcetools2', '', array($resource, $access));
+./pages/view.php:1633:          hook('aftersharelink', '', array($ref, $search, $offset, $order_by, $sort, $archive));
+./pages/view.php:1641:          if ((!checkperm("D") || hook('check_single_delete')) && !(isset($allow_resource_deletion) && !$allow_resource_deletion))
+./pages/view.php:1714:if(!hook('replaceactionslistclose')){
+./pages/view.php:1718:<?php } # end hook('replaceactionslistclose') ?>
+./pages/view.php:1741:if (!hook('replacemetadata')) {
+./pages/user_request.php:16:    $missingFields = hook('replacemainrequired');
+./pages/user_request.php:75:    //elseif (!hook('replaceantispam_check') && getval("antispamcode","") != hash("SHA256",strtoupper(getval("antispam","")) . $scramble_key . getval("antispamtime",0)))
+./pages/user_request.php:76:    elseif (!hook('replaceantispam_check') && !verify_antispam($spamcode,$usercode,$spamtime))
+./pages/contribute.php:48:    hook('custommycontributionlink');
+./pages/research_request.php:34:    <?php if (!hook('replace_research_request_form')) { ?>
+./pages/research_request.php:161:    <?php } # end hook('replace_research_request_form') ?>
+./pages/download_usage.php:59:    hook('before_usage_redirect');
+./pages/collection_share.php:126:               if($home_dash && checkPermission_dashcreate() && !hook('replace_share_dash_create'))
+./pages/admin/admin_content_edit.php:155:       if(!hook('managecontenteditgroupselector'))
+./pages/admin/admin_content_edit.php:190:                       if(!hook('ckeditorinit'))
+./pages/admin/admin_content_edit.php:209:                               hook('ckeditoroptions'); ?>
+./pages/admin/admin_home.php:16:                <?php if (!hook('replacegroupadmin')) { ?>
+./pages/admin/admin_manage_slideshow.php:271:                        <?php hook('render_replace_button_for_manage_slideshow', '', array($slideshow_file_info["ref"], $slideshow_file_info)); ?>
+./pages/admin/admin_manage_slideshow.php:275:                        <?php hook('render_replace_slideshow_form_for_manage_slideshow', '', array($slideshow_file_info["ref"], $slideshow_files)); ?>
+./pages/admin/admin_manage_slideshow.php:296:    hook('render_new_element_for_manage_slideshow', '', array($slideshow_files));
+./pages/admin/admin_system_config.php:372:$plugin_specific_definition = hook('add_system_config_page_def', '', array($page_def));
+./pages/admin/admin_resource_type_field_edit.php:104:   $alt_helptext=hook('rtfieldedithelptext', 'admin_resource_type_field_edit', array($propertyname));
+./pages/admin/admin_resource_type_field_edit.php:422:   hook('afterresourcetypefieldeditsave');
+./pages/admin/admin_resource_type_fields.php:175:if (!hook('replacenamecolumnheader'))
+./pages/admin/admin_resource_type_fields.php:178:if (!hook('replacetabnamecolumnheader'))
+./pages/admin/admin_resource_type_fields.php:203:    <?php if (!hook('replacenamecolumn')) {
+./pages/admin/admin_resource_type_fields.php:211:    <?php if (!hook('replacetabnamecolumn')) {
+./pages/collection_edit.php:54:    hook('saveadditionalfields');
+./pages/collection_edit.php:122:        <?php hook('additionalfields');?>
+./pages/collection_edit.php:268:        hook('additionalfields2');
+./pages/collection_edit.php:269:    hook('colleditformbottom');
+./pages/team/team_user.php:47:                          <?php if (!hook('replaceusergroups')) { ?>
+./pages/team/team_user.php:103:hook('modifyusersearch');
+./pages/team/team_user.php:141:<?php if(!hook('overrideuserlist')):
+./pages/team/team_user.php:256:    hook('render_options_to_create_users');
+./pages/team/team_report.php:263:<?php hook('customreportform', '', array($report)); ?>
+./pages/team/team_plugins.php:329:                    <?php hook('additional_plugin_columns'); ?>
+./pages/team/team_plugins.php:378:                <?php hook('additional_plugin_column_data'); ?>
+./pages/team/team_plugins.php:445:         <?php hook('additional_plugin_columns'); ?>
+./pages/team/team_plugins.php:477:            hook('additional_plugin_column_data');
+./pages/team/team_user_edit.php:46:             hook('aftersaveuser');
+./pages/team/team_user_edit.php:272:if(!hook('ticktoemailpassword'))
+./pages/team/team_batch_upload.php:36:if(!hook('replace_tbu_backlinks'))
+./pages/team/team_batch_upload.php:168:                 hook('after_alt_upload','',array($alternative,array("ref"=>$ref,"file_size"=>$file_size,"extension"=>$extension,"name"=>$uploadfiles[$n],"altdescription"=>"","path"=>$localpath,"basefilename"=>str_ireplace("." . $extension, '', $uploadfiles[$n]))));
+./pages/team/team_research_edit.php:109:<?php hook('research_request_extra_fields'); ?>
+./pages/done.php:5:if (getval("user","")!="" || isset($anonymous_login) || hook('provideusercredentials')) {include "../include/authenticate.php";} #Authenticate if already logged in, so the correct theme is displayed when using user group specific themes.
+./pages/done.php:31:    <?php if ((getval("user","")!="" || getval("k","")!="" || isset($anonymous_login) || hook('checkuserloggedin')) && getval("notloggedin","")=="") { # User logged in? ?>
+./pages/tools/staticsync.php:268:                       $modified_extension = hook('staticsync_modify_extension', 'staticsync', array($fullpath, $shortpath, $extension));
+./pages/tools/staticsync.php:285:                if($existing>0 || hook('staticsync_plugin_add_to_done'))
+./pages/tools/staticsync.php:369:                $modified_type = hook('modify_type', 'staticsync', array( $type ));
+./pages/tools/staticsync.php:383:                $modified_title = hook('modify_title', 'staticsync', array( $title ));
+./pages/tools/staticsync.php:454:                                        $modifiedval = hook('staticsync_mapvalue','',array($r, $value));
+./pages/user/user_dash_admin.php:147:           hook('after_dash_admin_create_new_tile');
+./pages/user/user_change_password.php:61:       if (hook('saveadditionaluserpreferences'))
+./pages/user/user_change_password.php:125:        hook('additionaluserpreferences');
+./pages/user/user_preferences.php:267:    $plugin_specific_definition = hook('add_user_preference_page_def', '', array($page_def));
+./pages/user/user_home.php:80:                  hook('user_home_additional_links');
+./pages/upload_plupload.php:139:$modify_redirecturl=hook('modify_redirecturl');
+./pages/upload_plupload.php:230:$uploadurl = generateURL("{$baseurl}/pages/upload_plupload.php", $uploadparams, $uploadurl_extra_params) . hook('addtopluploadurl');
+./pages/upload_plupload.php:417:        hook('additional_plupload_checks');
+./pages/upload_plupload.php:626:                            hook('after_alt_upload','',array($alternative,array("ref"=>$aref,"file_size"=>$file_size,"extension"=>$extension,"name"=>$plfilename,"altdescription"=>"","path"=>$path,"basefilename"=>str_ireplace("." . $extension, '', $plfilename))));
+./pages/upload_plupload.php:788:                            $wait = hook('afterpluploadfile', '', array($ref, $extension));
+./pages/upload_plupload.php:1055:                    <?php hook('upload_uploader_defined'); ?>
+./pages/upload_plupload.php:1185:                            <?php hook('beforeupload_end'); ?>
+./pages/upload_plupload.php:1625:hook('plupload_before_status');
+./pages/ajax/contactsheet.php:398:hook('endscript');
+./pages/ajax/metadata_report.php:109:   hook('more_metadata_report_headings');
+./pages/ajax/metadata_report.php:193:                   hook('more_metadata_report_cells');
+./pages/ajax/load_actions.php:18:        hook('render_themes_list_tools', '', $ref);
+./pages/search.php:528:hook('searchaftersearchcookie');
+./pages/search.php:923:hook('searchresultsheader');
+./pages/search.php:1000:    hook('responsiveresultoptions');
+./pages/search.php:1014:    if(!hook('replacedisplayselector','',array($search,(isset($collections)?$collections:""))))
+./pages/search.php:1087:                hook('adddisplaymode');
+./pages/search.php:1163:        $modifiedFields = hook('modifyorderfields', '', array($orderFields));
+./pages/search.php:1167:        if (!hook('sortordercontainer'))
+./pages/search.php:1173:            if(!hook('render_sort_order_differently', '', array($orderFields)))
+./pages/search.php:1178:            hook('sortorder');
+./pages/search.php:1408:        if ($offset==0 && isset($collections)&& strpos($search,"!")===false && $archive_standard && !hook('replacesearchpublic','',array($search,$collections)))
+./pages/search.php:1414:    hook('searchresources');
+./pages/search.php:1497:            hook('beforesearchviewcalls');
+./pages/search.php:1530:            hook('customdisplaymode');
+./pages/search.php:1557:    if(!hook('bottomnavigation'))
+./pages/search.php:1562:            <?php hook('add_bottom_in_page_nav_left'); ?>
+./pages/view_metadata.php:139:                if(!hook('renderfield', '', array($fields[$i], $resource)))
+./pages/view_metadata.php:176:            if(!hook('renderfield',"", array($fields[$i], $resource)))
+./pages/home.php:23:    if (!hook('homereplacewelcome') && !$no_welcometext)
+./pages/home.php:254:   hook('homepanelcontainerstart');
+./pages/download.php:63:    hook('modifydownloadpath');
+./pages/download.php:125:    hook('modifydownloadpath');
+./pages/download.php:173:hook('modifydownloadfile');
+./pages/download.php:196:    hook('moredlactions');
+./pages/download.php:297:if(!hook('replacefileoutput'))
+./pages/download.php:326:hook('beforedownloadresourceexit');
+./pages/search_views/resource_tools.php:94:if(!hook('iconcollect') && $pagename!="collections")
+./pages/search_views/thumbs.php:24:    hook('thumbs_resourceshell_height');
+./pages/search_views/thumbs.php:28:    <div class="ResourcePanel <?php echo ($display == 'xlthumbs' ? 'ResourcePanelLarge' : '') ?> ArchiveState<?php echo $result[$n]['archive'];?> <?php hook('thumbsviewpanelstyle'); ?> ResourceType<?php echo $result[$n]['resource_type']; ?>" id="ResourceShell<?php echo htmlspecialchars($ref)?>" <?php echo hook('resourcepanelshell_attributes')?>
+./pages/edit_fields/2.php:3:if(!hook('customchkboxes', '', array($field)))
+./pages/edit_fields/2.php:60:        if(!hook('rendereditchkboxes'))
+./pages/edit_fields/3.php:28:        hook('additionaldropdownattributes', '', array($field));
+./pages/edit_fields/3.php:38:if(!hook('replacedropdowndefault', '', array($field)) && (!in_array($field["ref"],$default_to_first_node_for_fields) || (in_array($field["ref"],$default_to_first_node_for_fields) && $pagename=="edit" && getval("uploader","")=="" && $value=='')))
+./pages/preview_all.php:203:    $modifiedurl=hook('previewallmodifyurl');
+./pages/collection_download.php:111:                    if (hook('size_is_available', '', array($result[$n], $p, $size_id)) || file_exists($p))
+./pages/collection_download.php:278:                    $new_file = hook('replacedownloadfile', '', array($result[$n], $usesize, $pextension, $target_exists));
+./pages/collection_download.php:336:                            hook('modifydownloadfile');
+./pages/collection_download.php:473:    hook('beforedownloadcollectionexit');
+./pages/collection_download.php:570:if (!hook('replacesizeoptions'))
+./pages/collection_download.php:590:    if(!hook('replace_display_size_option','',array($sizeID, $sizeName, $fordropdown))){
+./pages/collection_download.php:649:if (!hook('replaceuseoriginal'))
+./pages/collection_request.php:89:      hook('collectionrequestdetail','',array($cinfo['ref']));
+./pages/preview.php:94:hook('replacepreview');
+./pages/preview.php:231:        if(!hook('replacepreviewimage'))
+./pages/preview.php:250:                hook('afterpreviewimage');
+./pages/collections.php:266:    hook('collections_thumbs_loaded');
+./pages/collections.php:764:hook('before_collectionmenu');
+./pages/collections.php:862:                if (!hook('collectionaccessmode')) {
+./pages/collections.php:922:    hook('collectiontool');
+./pages/collections.php:969:            <?php if(!hook('replacesavedsearchtitle')){?>
+./pages/collections.php:972:            <?php if(!hook('replaceremovelink_savedsearch')){?>
+./pages/collections.php:1050:           <?php hook('before_collectionpaneltools'); ?>
+./pages/collections.php:1089:if($count_result > $max_collection_thumbs && !hook('replace_collectionpanel_viewall'))
+./pages/collections.php:1199:           if(!hook('replacecollectiontitle') && !hook('replacecollectiontitlemin'))
+./pages/collections.php:1212:           hook('aftertogglethumbs');
+./pages/collections.php:1221:           if(!hook('replace_collectionmindroptitle'))
+./pages/collection_email.php:213:                                       if (!hook('collectionaccessmode')) {

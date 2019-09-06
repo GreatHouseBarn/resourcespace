@@ -1,0 +1,5 @@
+librarylink_link,0,PRIMARY,1,id,A,0,,,,BTREE,,
+librarylink_link,1,ref,1,ref,A,0,,,,BTREE,,
+librarylink_link,1,xgkey,1,xgkey,A,0,,,,BTREE,,
+librarylink_link,1,xgtype,1,xgtype,A,0,,,,BTREE,,
+librarylink_link,1,xgrank,1,xgrank,A,0,,,,BTREE,,
