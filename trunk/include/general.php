@@ -5339,19 +5339,31 @@ function run_external($cmd,&$code)
     return $output;
 }
 
-function error_alert($error,$back=true){
-
-    foreach ($GLOBALS as $key=>$value){
+function error_alert($error, $back = true, $code = 403)
+    {
+    foreach($GLOBALS as $key => $value)
+        {
         $$key=$value;
-    } 
-    if ($back){include(dirname(__FILE__)."/header.php");}
-    http_response_code(403);
+        }
+
+    http_response_code($code);
+
+    if($back)
+        {
+        include(dirname(__FILE__)."/header.php");
+        }
+
     echo "<script type='text/javascript'>
-    ModalClose();
-    styledalert('" . $lang["error"] . "', '$error');";
-    if ($back){echo "history.go(-1);";}
+        ModalClose();
+        styledalert('" . $lang["error"] . "', '$error');";
+
+    if($back)
+        {
+        echo "history.go(-1);";
+        }
+
     echo "\n</script>";
-}
+    }
 /**
  * Returns an xml compliant string in UTF-8
  *
@@ -7074,8 +7086,7 @@ function delete_old_collections($userref=0, $days=30)
 * 
 * @return boolean|integer - ref of new field, false if unsuccessful
 */
-
-function create_resource_type_field($name,$restype = 0, $type = FIELD_TYPE_TEXT_BOX_SINGLE_LINE, $shortname = "", $index=false)
+function create_resource_type_field($name, $restype = 0, $type = FIELD_TYPE_TEXT_BOX_SINGLE_LINE, $shortname = "", $index=false)
     {
     if((trim($name)=="") || !is_numeric($type) || !is_numeric($restype))
         {
@@ -7379,7 +7390,8 @@ function is_resourcespace_upgrade_available()
     $last_cvn_update = get_sysvar('last_cvn_update');
 
     $centralised_version_number = $cvn_cache;
-
+    debug("RS_UPGRADE_AVAILABLE: cvn_cache = {$cvn_cache}");
+    debug("RS_UPGRADE_AVAILABLE: last_cvn_update = $last_cvn_update");
     if($last_cvn_update !== false)
         {
         $cvn_cache_interval = DateTime::createFromFormat('Y-m-d H:i:s', $last_cvn_update)->diff(new DateTime());
@@ -7393,9 +7405,10 @@ function is_resourcespace_upgrade_available()
     if($centralised_version_number === false)
         {
         $centralised_version_number = @file_get_contents('https://www.resourcespace.com/current_release.txt');
-
+        debug("RS_UPGRADE_AVAILABLE: centralised_version_number = $centralised_version_number");
         if($centralised_version_number === false)
             {
+            debug("RS_UPGRADE_AVAILABLE: unable to get centralised_version_number from https://www.resourcespace.com/current_release.txt");
             return false; 
             }
 
@@ -7430,6 +7443,9 @@ function is_resourcespace_upgrade_available()
     $product_version_data = $get_version_details($product_version);
 
     $cvn_data = $get_version_details($centralised_version_number);
+
+    debug("RS_UPGRADE_AVAILABLE: product_version = $product_version");
+    debug("RS_UPGRADE_AVAILABLE: centralised_version_number = $centralised_version_number");
 
     if(empty($product_version_data) || empty($cvn_data))
         {
