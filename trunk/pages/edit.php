@@ -856,22 +856,9 @@ function ShowHelp(field)
     
     // Disable autosave on enter keypress as form will be submitted by this keypress anyway which can result in duplicate data
     
-    // jQuery(document).bind('keydown',function (e)
-    //     {               
-    //     if(e.which == 13)
-    //         {
-    //         preventautosave=true;
-    //         e.preventDefault();
-    //         }
-    //     else
-    //         {
-    //         preventautosave=false;  
-    //         }
-    //     });
-        
-    jQuery(document).on("keydown", ":input:not(textarea)", function(e) 
+    jQuery(document).on("keydown", ":input:not(textarea):input:not(text)", function(e) 
         {
-        if (e.key == "Enter") 
+        if (e.which == 13) 
             {
             preventautosave = true;
             e.preventDefault();
@@ -1757,9 +1744,12 @@ if ($ref<0) # Upload template.
 ?>
 </div><!-- end of ResourceMetadataSection -->
 <?php
-# Status / Access / Related Resources
 
-if (eval($show_status_and_access_on_upload_perm) && !hook("editstatushide")) # Only display Status / Access / Related Resources if permissions match.
+# Status / Access / Related Resources
+if (  ($ref > 0 && $upload_review_mode && eval($show_status_and_access_on_upload_perm) )  # If editing a resource after upload
+   || ($ref < 0 && eval($show_status_and_access_on_upload_perm) ) # If editing a resource template
+   || ($ref > 0 && !$upload_review_mode) # If regular resource edit
+   || !hook("editstatushide")  ) # If grant_edit plugin isn't overriding
 {
   if(!hook("replacestatusandrelationshipsheader"))
   {

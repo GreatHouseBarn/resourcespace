@@ -1314,11 +1314,14 @@ function toggleFieldLock(field)
 function headerLinksDropdown()
     {
     var containerWidth = jQuery("#HeaderLinksContainer").innerWidth() - 30;
-    var links = document.getElementsByClassName("HeaderLink");
+    var links =  jQuery("#HeaderLinksContainer").find(".HeaderLink"); // get elements that are links in the header bar
     var linksWidth = 0;
     var caretCreated = false;
 
-    if (jQuery(window).width() <= 1279 || jQuery('#Header').hasClass('HeaderLarge'))
+    jQuery("#OverFlowLinks").remove(); // remove the drop-down menu div
+
+       
+    if (jQuery(window).width() < 1200 || jQuery('#Header').hasClass('HeaderLarge'))
         {
         return;
         }
@@ -1330,17 +1333,20 @@ function headerLinksDropdown()
 
     for (var i = 0; i < links.length; i++)
         {
-        linksWidth += jQuery(links.item(i)).outerWidth();
+        linksWidth += jQuery(links[i]).outerWidth();
 
         if (linksWidth > containerWidth)
             {
             if (!caretCreated)
                 {
-                jQuery(links.item(i- 1)).after('<li id="OverflowListElement"><a href="#" id="DropdownCaret" onclick="showHideLinks();"><span class="fa fa-caret-down"></span></a><div id="OverFlowLinks"><ul id="HiddenLinks"></ul></div></li>');
-                
+                jQuery(links[i- 1]).after('<li id="OverflowListElement"><a href="#" id="DropdownCaret" onclick="showHideLinks();"><span class="fa fa-caret-down"></span></a></li>');
+                // append a div to the document.body element that will contain the drop-down menu items
+                jQuery(document.body).append('<div id="OverFlowLinks"><ul id="HiddenLinks"></ul></div>'); 
                 caretCreated = true;
                 }
-            jQuery(links.item(i)).detach().appendTo('#HiddenLinks');
+            // remove the li element from header links and append it to drop-down link list    
+            jQuery(links[i]).remove();    
+            jQuery(links[i]).appendTo('#HiddenLinks');
             }
         }
     }
@@ -1355,7 +1361,11 @@ function showHideLinks()
     jQuery('#OverFlowLinks').fadeToggle();
     if (jQuery('#Header .HeaderSearchForm').length)
         {
-        jQuery('#OverFlowLinks').css('right', 422);
+        jQuery('#OverFlowLinks').css('right', 550);
+        jQuery('#OverFlowLinks').css('top', 50);
+        jQuery('#OverFlowLinks').css('z-index', 1000);
+        jQuery('#HiddenLinks').css('margin-left', 0);
+        jQuery('#HiddenLinks').css('text-align', 'left');
         }
     }
 
@@ -1633,10 +1643,10 @@ function RenderActiveFilter(name, data)
     label.innerHTML = name;
 
     data = typeof data === "undefined" ? {} : data;
-    for(const [key, value] of Object.entries(data))
+    jQuery.each(data, function(key, value)
         {
         label.setAttribute("data-" + key, value);
-        }
+        });
 
     label.insertAdjacentElement("beforeend", CloseButtonElement());
 
@@ -1846,12 +1856,12 @@ function ResetActiveFiltersDisplay()
 
             if(typeof field_name !== "undefined" && field_name.trim() != "")
                 {
-                field_data = resource_type_fields_data.filter(data => data.name === field_name)[0];
+                field_data = resource_type_fields_data.filter(function(data) { return data.name === field_name; })[0];
                 }
             // Nodes will only pass the resource_type_field instead of the shortname of the field
             else if(typeof resource_type_field !== "undefined" && resource_type_field > 0)
                 {
-                field_data = resource_type_fields_data.filter(data => data.ref == resource_type_field)[0];
+                field_data = resource_type_fields_data.filter(function(data) { return data.ref == resource_type_field; })[0];
                 node_elements = jQuery(event.target).parent().find("span[data-node-ref]");
                 }
             else if(jQuery(event.target).parent().data("basic-date") === true)
@@ -2004,3 +2014,39 @@ function ResetActiveFiltersDisplay()
         }
     return;
     }
+
+
+/*
+Polyfill for Object.assign for browsers that don't support this (e.g IE 11)
+
+Source: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
+*/
+if (typeof Object.assign !== 'function') {
+  // Must be writable: true, enumerable: false, configurable: true
+  Object.defineProperty(Object, "assign", {
+    value: function assign(target, varArgs) { // .length of function is 2
+      'use strict';
+      if (target === null || target === undefined) {
+        throw new TypeError('Cannot convert undefined or null to object');
+      }
+
+      var to = Object(target);
+
+      for (var index = 1; index < arguments.length; index++) {
+        var nextSource = arguments[index];
+
+        if (nextSource !== null && nextSource !== undefined) { 
+          for (var nextKey in nextSource) {
+            // Avoid bugs when hasOwnProperty is shadowed
+            if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
+              to[nextKey] = nextSource[nextKey];
+            }
+          }
+        }
+      }
+      return to;
+    },
+    writable: true,
+    configurable: true
+  });
+}
