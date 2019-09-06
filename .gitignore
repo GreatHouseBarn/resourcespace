@@ -1,0 +1,4 @@
+*.log
+trunk/upload
+trunk/filestore
+include/config.php
