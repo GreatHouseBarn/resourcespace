@@ -1,5 +1,7 @@
 *.log
-trunk/upload
-trunk/filestore
+trunk/upload/*
+trunk/filestore/*
+!trunk/upload/README.md
+!trunk/filestore/README.md
 trunk/.svn
 include/config.php
