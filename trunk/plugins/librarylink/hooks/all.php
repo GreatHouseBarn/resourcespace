@@ -17,13 +17,8 @@ if($librarylink_hook_debug_enable and !function_exists('hook_modifier'))
         }
     }
 
-function api_libraylink_test($resource)
-    {
-        return "LibraryLink Test";
-    }
-
 function HookLibrarylinkAllAdd_bottom_in_page_nav_left()
     {
-    print "<p>Hello World</p>";
+    print "<p>Hello World - test librarylink hook</p>";
     return true;
     }

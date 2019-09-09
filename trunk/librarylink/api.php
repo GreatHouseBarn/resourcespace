@@ -1,24 +1,8 @@
 <?php
 
-# Some example function calls.
-#
-#$query="user=" . $user . "&function=do_search&param1="; # <--- The function to execute, and parameters
-#$query="user=" . $user . "&function=get_resource_field_data&param1=1"; # <--- The function to execute, and parameters
-#$query="user=" . $user . "&function=create_resource&param1=1"; # <--- The function to execute, and parameters
-#$query="user=" . $user . "&function=update_field&param1=1&param2=8&param3=Example"; # <--- The function to execute, and parameters
-#$query="user=" . $user . "&function=delete_resource&param1=1"; # <--- The function to execute, and parameters
-#$query="user=" . $user . "&function=copy_resource&param1=2"; # <--- The function to execute, and parameters
-#$query="user=" . $user . "&function=get_resource_data&param1=2"; # <--- The function to execute, and parameters
-#$query="user=" . $user . "&function=get_alternative_files&param1=2"; # <--- The function to execute, and parameters
-#$query="user=" . $user . "&function=get_resource_types"; # <--- The function to execute, and parameters
-#$query="user=" . $user . "&function=add_alternative_file&param1=2&param2=Test"; # <--- The function to execute, and parameters
-#$query="user=" . $user . "&function=get_resource_log&param1=2"; # <--- The function to execute, and parameters
-#$query="user=" . $user . "&function=upload_file_by_url&param1=2&param2=&param3=&param4=&param5=" . urlencode("http://www.montala.com/img/slideshow/montala-bg.jpg"); # <--- The function to execute, and parameters
-# Create resource, add a file and add metadata in one pass.
-#$query="user=" . $user . "&function=create_resource&param1=1&param2=&param3=" . urlencode("http://www.montala.com/img/slideshow/montala-bg.jpg") . "&param4=&param5=&param6=&param7=" . urlencode(json_encode(array(1=>"Foo",8=>"Bar"))); # <--- The function to execute, and parameters
-
-
 $api_calls=array(
+    // Existing ResourceSpace API endpoints are defined here:
+    array("api"=>"---ResourceSpace API Functions:---"),
     array("api"=>"do_search","search"=>null,"restypes"=>"","order_by"=>"relevance","archive"=>0,"fetchrows"=>-1,"sort"=>"desc"),
     array("api"=>"search_get_previews","search"=>null,"restypes"=>"","order_by"=>"relevance","archive"=>0,"fetchrows"=>-1,"sort"=>"desc","recent_search_daylimit"=>"","getsizes"=>"","previewext"=>"jpg"),
     array("api"=>"get_resource_field_data","resource"=>null),
@@ -47,7 +31,12 @@ $api_calls=array(
     array("api"=>"set_node","ref"=>null,"resource_type_field"=>null,"name"=>null,"parent"=>'',"order_by"=>0,"returnexisting"=>false),
     array("api"=>"add_resource_nodes","resource"=>null,"nodestring"=>null),
     array("api"=>"add_resource_nodes_multi","resources"=>null,"nodestring"=>null),
-    array("api"=>"resource_log_last_rows","minref"=>0,"days"=>7,"maxrecords"=>0)
+    array("api"=>"resource_log_last_rows","minref"=>0,"days"=>7,"maxrecords"=>0),
+    array("api"=>"---LibraryLink API Functions:---"),
+    // Our LibraryLink API extensions are defined here:
+    array("api"=>"librarylink_test","ref"=>null),
+    array("api"=>"librarylink_add_links","resource"=>null,"links_csv"=>null,"add_keywords"=>"true"),
+    array("api"=>"librarylink_delete_links","resource"=>null,"links_csv"=>"","delete_keywords"=>"true")
 );
 
 $private_key="ac79b20c58fed01d354ffa2c85fac227b472ed83634195180e4f5bd573fdecdc"; # <---  From RS user edit page for the user to log in as
@@ -77,7 +66,7 @@ if(isset($_POST['Execute'])) {
     # Sign the query using the private key
     $sign=hash("sha256",$private_key . $query);
     $query.='&sign='.$sign;
-    $query=$_SERVER['HTTP_ORIGIN'].'/api/?'.$query;
+    $query=$_SERVER['HTTP_ORIGIN'].'/librarylink/api/?'.$query;
     # Make the request.
     $results=file_get_contents($query);
 }
@@ -102,7 +91,8 @@ if(isset($_POST['Execute'])) {
         <select name="api" onclick="this.form.submit();">
         <?php
             for($i=0;$i<count($api_calls);$i++) {
-                printf('<option value="%s" %s>%s</option>\n',$api_calls[$i]['api'],$name==$api_calls[$i]['api']?'selected':'',$api_calls[$i]['api']);
+                $a=$api_calls[$i]['api'];
+                printf('<option value="%s" %s %s>%s</option>\n',$a,$name==$a?'selected':'',$a[0]=="-"?'disabled':'',$a);
             }
         ?>
         </select>    
@@ -111,6 +101,7 @@ if(isset($_POST['Execute'])) {
 <?php
     if($p>0) {
         printf("<legend>%s</legend>\n",$param[0]['value']);
+        print "<p>Parameters:</p>\n";
         print "<table cellspacing=5>\n";
         for($i=1;$i<$p;$i++) {
             printf('<tr><td><label>%s: </label></td><td><input type="text" name="%s" value="%s"></td><td>%s</td></tr>',
