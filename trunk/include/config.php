@@ -129,7 +129,7 @@ $resource_type_icons=true;
 $resource_type_icons_mapping = array(1 => "camera", 2 => "file", 3 => "video-camera", 4 => "music");
 
 # Image preview zoom using jQuery.zoom (hover over the preview image to zoom in on the resource view page)
-$image_preview_zoom=false;
+$image_preview_zoom=true;
 
 $omit_filter_bar_pages = array();
 
