@@ -9,4 +9,4 @@ Currently looking at adapting a DAM application called
 # resourcespace
 Fork of svn co http://svn.resourcespace.com/svn/rs/trunk/
 
-with our own proprierty plugins for LibraryLink functionality.
+with our own proprietry plugins for LibraryLink functionality.
