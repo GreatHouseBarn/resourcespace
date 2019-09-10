@@ -32,7 +32,7 @@ function api_librarylink_delete_links($xg_type, $xg_key, $delete_keywords = true
     return librarylink_delete_links($xg_type, $xg_key, $delete_keywords);
     }
 
-function api_librarylink_upload_resource($resource_type,$archive=999,$no_exif=false,$revert=false,$autorotate=false,$metadata="")
+function api_librarylink_upload_resource($resource_type,$archive=0,$no_exif=false,$revert=false,$autorotate=false,$metadata="")
     {
         if (!(checkperm("c") || checkperm("d")) || checkperm("XU" . $resource_type))
             {
@@ -68,3 +68,36 @@ function api_librarylink_upload_resource($resource_type,$archive=999,$no_exif=fa
     
         return $ref;
     }
+
+    function api_librarylink_do_search($xg_type="",$xg_key="",$fetchrows=-1,$sort="desc")
+        {
+
+            $fetchrows = ($fetchrows > 0 ? $fetchrows : -1);
+
+            # Search capability.
+            # Note the subset of the available parameters. We definitely don't want to allow override of permissions or filters.
+                
+            if(!checkperm('s'))
+                {
+                return array();
+                }
+                
+            $results = librarylink_do_search($xg_type,$xg_key,$fetchrows,$sort);
+        
+            if (!is_array($results))
+                {
+                return array();
+                }
+           
+            for ($n = 0; $n < count($results); $n++)
+                {
+                if (is_array($results[$n]))
+                    {
+                    $results[$n] = array_map("i18n_get_translated",$results[$n]);
+                    }
+                }
+            return $results;
+
+
+            return "Not Implemented";
+        }

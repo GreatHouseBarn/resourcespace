@@ -40,7 +40,8 @@ $api_calls=array(
     array("api"=>"librarylink_delete_resource_link","ref"=>null,"xg_type"=>null,"xg_key"=>null,"delete_keywords"=>"true"),
     array("api"=>"librarylink_modify_resource_link","ref"=>null,"xg_type"=>null,"xg_key"=>null,"xg_rank"=>null),
     array("api"=>"librarylink_delete_links","xg_type"=>null,"xg_key"=>null,"delete_keywords"=>"true"),
-    array("api"=>"librarylink_upload_resource","resource_type"=>1,"archive"=>999,"no_exif"=>"false","revert"=>"false","autorotate"=>"false","metadata"=>"","userfile"=>null),
+    array("api"=>"librarylink_upload_resource","resource_type"=>"1 (Photo)","archive"=>"0 (Active)","no_exif"=>"false","revert"=>"false","autorotate"=>"false","metadata"=>"","userfile"=>null),
+    array("api"=>"librarylink_do_search","xg_type"=>"","xg_key"=>"","fetchrows"=>-1,"sort"=>"desc")
 );
 
 $private_key="ac79b20c58fed01d354ffa2c85fac227b472ed83634195180e4f5bd573fdecdc"; # <---  From RS user edit page for the user to log in as

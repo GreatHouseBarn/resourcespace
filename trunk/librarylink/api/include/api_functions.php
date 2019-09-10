@@ -107,3 +107,26 @@ function librarylink_delete_links($xg_type, $xg_key, $delete_keywords)
         
         return $resource_ids; //list of resource ids
     }
+
+function librarylink_do_search($xg_type, $xg_key, $fetchrows, $sort)
+    {
+        $resources=array();
+        if(!preg_match('/^[0-9]+$/',$fetchrows)) $fetchrows=0;
+        if(!in_array($sort,array('asc','desc'))) $sort='asc';
+        $limit=$fetchrows>0?'limit '.$fetchrows:'';
+        $order=' ORDER BY xgrank '.$sort;
+
+        if($xg_type=="" and $xg_key=="") { return $resources; }
+        if($xg_type=="") { $resource_ids = sql_array(sprintf("SELECT ref as value from librarylink_link where xgkey='%s' %s %s",escape_check($xg_key),$order,$limit)); }
+        elseif($xg_key=="") { $resource_ids = sql_array(sprintf("SELECT ref as value from librarylink_link where xgtype='%s' %s %s",escape_check($xg_type),$order,$limit)); }
+        else $resource_ids = sql_array(sprintf("SELECT ref as value from librarylink_link where xgtype='%s' and xgkey='%s' %s %s",escape_check($xg_type),escape_check($xg_key),$order,$limit));
+
+        if(count($resource_ids)===0) { return $resources; }
+        foreach($resource_ids as $ref)
+        {
+            $resource=get_resource_data($ref, true);
+            lldebug($resource);
+            $resources[]=$resource; 
+        }
+        return $resources;
+    }
