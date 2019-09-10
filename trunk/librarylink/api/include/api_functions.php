@@ -168,3 +168,46 @@ function librarylink_update_ranks($xg_type, $xg_key, $xg_rank)
         if(!preg_match('/^[0-9]+$/',$xg_rank)) $xg_rank=1;
         sql_query(sprintf("UPDATE librarylink_link set xgrank=xgrank+1 where xgtype='%s' and xgkey='%s' and xgrank>=%s",escape_check($xg_type),escape_check($xg_key),$xg_rank));
     }
+
+function librarylink_create_librarylink_collection()
+    {
+    global $userref, $collection_allow_creation;
+    if (checkperm("b") || !$collection_allow_creation)
+        {
+        return false;
+        }
+    $collections=get_user_collections($userref);
+    $found=false;
+    for($i=0;$i<count($collections);$i++)
+        {
+            if($collections[$i]['name']==='LibraryLink')
+                {
+                    $found=true;
+                    break;
+                }
+        }
+    
+    if(!$found) { create_collection($userref,'LibraryLink',0); }
+    return true;
+    }
+
+function is_librarylink_collection($usercollection)
+    {
+        global $userref, $collection_allow_creation;
+        if (checkperm("b") || !$collection_allow_creation)
+            {
+            return false;
+            }
+        $collections=get_user_collections($userref);
+        for($i=0;$i<count($collections);$i++)
+            {
+                if($collections[$i]['ref']==$usercollection and $collections[$i]['name']==='LibraryLink') return true;
+            }
+        return false;       
+    }
+
+function librarylink_get_all_records()
+    {
+        $records=sql_array("SELECT distinct concat(xgtype,' / ',xgkey) as value from librarylink_link order by xgtype,xgkey");
+        return $records;
+    }
