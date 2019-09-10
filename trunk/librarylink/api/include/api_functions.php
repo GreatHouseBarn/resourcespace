@@ -34,12 +34,19 @@ function librarylink_add_resource_link($ref, $xg_type, $xg_key, $xg_rank, $add_k
         $userinfo=get_user($userref);
         $user=$userinfo["username"] . "-" . $userinfo["fullname"];
 
-        $id = sql_value(sprintf("select id as value from librarylink_link where ref=%s and xgtype='%s' and xgkey='%s'",$ref,escape_check($xg_type),escape_check($xg_key)),0);
-        if($id>0) { return (object)array('error'=>'a record link with that xgtype and xgkey already exists for this resource'); }
-        
-        sql_query(sprintf("INSERT into librarylink_link (ref,xgtype,xgkey,xgrank,label) values (%s,'%s','%s',%s,'%s')",$ref,escape_check($xg_type),escape_check($xg_key),$xg_rank,''));
-        $id=sql_insert_id();
-        sql_query(sprintf("INSERT into librarylink_log (ref,xgtype,xgkey,xgrank,operation,user,`time`) values (%s,'%s','%s',%s,'%s','%s','%s')",$ref,escape_check($xg_type),escape_check($xg_key),$xg_rank,'Add Link',escape_check($user),date('Y-m-d H:i:s')));
+        $id = (int)sql_value(sprintf("select id as value from librarylink_link where ref=%s and xgtype='%s' and xgkey='%s'",$ref,escape_check($xg_type),escape_check($xg_key)),0);
+        if($id===0)
+            {
+            db_begin_transaction();
+            librarylink_update_ranks($xg_type, $xg_key, $xg_rank); //shift ranks up by one where we want to place a rank
+            sql_query(sprintf("INSERT into librarylink_log (ref,xgtype,xgkey,xgrank,operation,user,`time`) values (%s,'%s','%s',%s,'%s','%s','%s')",$ref,escape_check($xg_type),escape_check($xg_key),$xg_rank,"Move Links Ranks >= $xg_rank up one",escape_check($user),date('Y-m-d H:i:s')));
+            sql_query(sprintf("INSERT into librarylink_link (ref,xgtype,xgkey,xgrank,label) values (%s,'%s','%s',%s,'%s')",$ref,escape_check($xg_type),escape_check($xg_key),$xg_rank,''));
+            $id=sql_insert_id();
+            sql_query(sprintf("INSERT into librarylink_log (ref,xgtype,xgkey,xgrank,operation,user,`time`) values (%s,'%s','%s',%s,'%s','%s','%s')",$ref,escape_check($xg_type),escape_check($xg_key),$xg_rank,'Add Link',escape_check($user),date('Y-m-d H:i:s')));
+            db_end_transaction();
+            } else {
+                return (object)array('error'=>'a record link with that xgtype and xgkey already exists for this resource');
+            }
 
         return $id; //link id
     }
@@ -81,8 +88,12 @@ function librarylink_modify_resource_link($ref, $xg_type, $xg_key, $xg_rank)
         $id = (int)sql_value(sprintf("select id as value from librarylink_link where ref=%s and xgtype='%s' and xgkey='%s'",$ref,escape_check($xg_type),escape_check($xg_key)),0);
         if($id===0) { return (object)array('error'=>'the specified resource does not have a record link with that xgtype and xgkey'); }
 
+        db_begin_transaction();
+        librarylink_update_ranks($xg_type, $xg_key, $xg_rank); //shift ranks up by one where we want to place a rank
+        sql_query(sprintf("INSERT into librarylink_log (ref,xgtype,xgkey,xgrank,operation,user,`time`) values (%s,'%s','%s',%s,'%s','%s','%s')",$ref,escape_check($xg_type),escape_check($xg_key),$xg_rank,"Move Links Ranks >= $xg_rank up one",escape_check($user),date('Y-m-d H:i:s')));
         sql_query(sprintf("UPDATE librarylink_link set xgrank=%s where id=%s",$xg_rank,$id));
         sql_query(sprintf("INSERT into librarylink_log (ref,xgtype,xgkey,xgrank,operation,user,`time`) values (%s,'%s','%s',%s,'%s','%s','%s')",$ref,escape_check($xg_type),escape_check($xg_key),$xg_rank,'Update Link Rank',escape_check($user),date('Y-m-d H:i:s')));
+        db_end_transaction();
 
         return $id; //link id
     }
@@ -108,6 +119,23 @@ function librarylink_delete_links($xg_type, $xg_key, $delete_keywords)
         return $resource_ids; //list of resource ids
     }
 
+    function librarylink_delete_links_by_ref($ref, $delete_keywords)
+    {
+        if(!preg_match('/^[0-9]+$/',$ref)) { return (object)array('error'=>'resource ref must be a number'); }
+
+        $resource=get_resource_data($ref, true);
+        if(!$resource) { return (object)array('error'=>'a resource with that ref could not be found'); }
+
+        global $userref;
+        $userinfo=get_user($userref);
+        $user=$userinfo["username"] . "-" . $userinfo["fullname"];
+
+        sql_query(sprintf("DELETE from librarylink_link where ref=%s",$ref));
+        sql_query(sprintf("INSERT into librarylink_log (ref,xgtype,xgkey,xgrank,operation,user,`time`) values (%s,'%s','%s',%s,'%s','%s','%s')",$ref,'','',0,'Delete all links',escape_check($user),date('Y-m-d H:i:s')));
+        
+        return true;
+    }
+
 function librarylink_do_search($xg_type, $xg_key, $fetchrows, $sort)
     {
         $resources=array();
@@ -117,16 +145,26 @@ function librarylink_do_search($xg_type, $xg_key, $fetchrows, $sort)
         $order=' ORDER BY xgrank '.$sort;
 
         if($xg_type=="" and $xg_key=="") { return $resources; }
-        if($xg_type=="") { $resource_ids = sql_array(sprintf("SELECT ref as value from librarylink_link where xgkey='%s' %s %s",escape_check($xg_key),$order,$limit)); }
-        elseif($xg_key=="") { $resource_ids = sql_array(sprintf("SELECT ref as value from librarylink_link where xgtype='%s' %s %s",escape_check($xg_type),$order,$limit)); }
-        else $resource_ids = sql_array(sprintf("SELECT ref as value from librarylink_link where xgtype='%s' and xgkey='%s' %s %s",escape_check($xg_type),escape_check($xg_key),$order,$limit));
+        if($xg_type=="") { $links = sql_query(sprintf("SELECT * from librarylink_link where xgkey='%s' %s %s",escape_check($xg_key),$order,$limit)); }
+        elseif($xg_key=="") { $links = sql_query(sprintf("SELECT * from librarylink_link where xgtype='%s' %s %s",escape_check($xg_type),$order,$limit)); }
+        else $links = sql_query(sprintf("SELECT * from librarylink_link where xgtype='%s' and xgkey='%s' %s %s",escape_check($xg_type),escape_check($xg_key),$order,$limit));
 
-        if(count($resource_ids)===0) { return $resources; }
-        foreach($resource_ids as $ref)
+        if(count($links)===0) { return $resources; }
+        //lldebug($links);
+        foreach($links as $link)
         {
-            $resource=get_resource_data($ref, true);
-            lldebug($resource);
+            $resource=get_resource_data($link["ref"], true);
+            $resource['xg_type']=$link['xgtype'];
+            $resource['xg_key']=$link['xgkey'];
+            $resource['xg_rank']=$link['xgrank'];
+            //lldebug($resource);
             $resources[]=$resource; 
         }
         return $resources;
+    }
+
+function librarylink_update_ranks($xg_type, $xg_key, $xg_rank)
+    {
+        if(!preg_match('/^[0-9]+$/',$xg_rank)) $xg_rank=1;
+        sql_query(sprintf("UPDATE librarylink_link set xgrank=xgrank+1 where xgtype='%s' and xgkey='%s' and xgrank>=%s",escape_check($xg_type),escape_check($xg_key),$xg_rank));
     }

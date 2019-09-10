@@ -32,6 +32,11 @@ function api_librarylink_delete_links($xg_type, $xg_key, $delete_keywords = true
     return librarylink_delete_links($xg_type, $xg_key, $delete_keywords);
     }
 
+function api_librarylink_delete_links_by_ref($ref, $delete_keywords = true)
+    {
+    return librarylink_delete_links_by_ref($ref, $delete_keywords);
+    }
+
 function api_librarylink_upload_resource($resource_type,$archive=0,$no_exif=false,$revert=false,$autorotate=false,$metadata="")
     {
         if (!(checkperm("c") || checkperm("d")) || checkperm("XU" . $resource_type))

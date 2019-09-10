@@ -22,3 +22,10 @@ function HookLibrarylinkAllAdd_bottom_in_page_nav_left()
     print "<p>Hello World - test librarylink hook</p>";
     return true;
     }
+
+function HookLibraryLinkAllBeforedeleteresourcefromdb($ref)
+    {
+        lldebug("Hook: Beforedeleteresourcefromdb was called.");
+        librarylink_delete_links_by_ref($ref, false);
+        return true;
+    }
