@@ -42,7 +42,8 @@ $api_calls=array(
     array("api"=>"librarylink_delete_links","xg_type"=>null,"xg_key"=>null,"delete_keywords"=>'"true"'),
     array("api"=>"librarylink_delete_links_by_ref","ref"=>null, "delete_keywords"=>'"true"'),
     array("api"=>"librarylink_upload_resource","resource_type"=>"1 (Photo)","archive"=>"0 (Active)","no_exif"=>'"false"',"revert"=>'"false"',"autorotate"=>'"false"',"metadata"=>'"" (empty)',"userfile"=>null),
-    array("api"=>"librarylink_do_search","xg_type"=>'"" (empty)',"xg_key"=>'"" (empty)',"fetchrows"=>-1,"sort"=>'"desc"')
+    array("api"=>"librarylink_do_search","xg_type"=>'"" (empty)',"xg_key"=>'"" (empty)',"fetchrows"=>-1,"sort"=>'"desc"'),
+    array("api"=>"librarylink_do_search_iframe","xg_type"=>'"" (empty)',"xg_key"=>'"" (empty)',"fetchrows"=>-1,"sort"=>'"desc"')
 );
 
 $private_key="ac79b20c58fed01d354ffa2c85fac227b472ed83634195180e4f5bd573fdecdc"; # <---  From RS user edit page for the user to log in as
@@ -162,5 +163,8 @@ if(isset($_POST['Execute'])) {
         <textarea name="output" id="output" rows=20 style="width:100%;"><?php echo htmlspecialchars($results); ?></textarea>
     </fieldset>
 
+    <fieldset><legend>Iframe:</legend>
+        <iframe width="100%" height=300 src="<?php print $query; ?>">Your browser does not support Iframes</iframe>
+    </fieldset>    
 </body>
 </html>

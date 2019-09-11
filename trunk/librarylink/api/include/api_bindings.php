@@ -8,7 +8,7 @@
 function api_librarylink_test($ref)
     {
         lldebug("LibraryLink Test - $ref");
-        return "LibraryLink Test - $ref";
+        return array("LibraryLink Test - $ref", $_REQUEST);
     }
 
 
@@ -74,35 +74,57 @@ function api_librarylink_upload_resource($resource_type,$archive=0,$no_exif=fals
         return $ref;
     }
 
-    function api_librarylink_do_search($xg_type="",$xg_key="",$fetchrows=-1,$sort="desc")
-        {
-
-            $fetchrows = ($fetchrows > 0 ? $fetchrows : -1);
-
-            # Search capability.
-            # Note the subset of the available parameters. We definitely don't want to allow override of permissions or filters.
-                
-            if(!checkperm('s'))
-                {
-                return array();
-                }
-                
-            $results = librarylink_do_search($xg_type,$xg_key,$fetchrows,$sort);
+function api_librarylink_do_search($xg_type="",$xg_key="",$fetchrows=-1,$sort="desc")
+    {
+        $fetchrows = ($fetchrows > 0 ? $fetchrows : -1);
+        # Search capability.
+        # Note the subset of the available parameters. We definitely don't want to allow override of permissions or filters.            
+        if(!checkperm('s'))
+            {
+            return array();
+            }
+            
+        $results = librarylink_do_search($xg_type,$xg_key,$fetchrows,$sort);
+    
+        if (!is_array($results)) { return array(); }
         
-            if (!is_array($results))
+        for ($n = 0; $n < count($results); $n++)
+            {
+            if (is_array($results[$n]))
                 {
-                return array();
+                $results[$n] = array_map("i18n_get_translated",$results[$n]);
                 }
-           
-            for ($n = 0; $n < count($results); $n++)
+            }
+        return $results;
+    }
+
+function api_librarylink_do_search_iframe($xg_type="",$xg_key="",$fetchrows=-1,$sort="desc")
+    {
+        $fetchrows = ($fetchrows > 0 ? $fetchrows : -1);
+        # Search capability.
+        # Note the subset of the available parameters. We definitely don't want to allow override of permissions or filters.            
+        if(!checkperm('s')) { return $head.'<h3>No permission to search</h3>'.$foot; }
+            
+        $results = librarylink_do_search($xg_type,$xg_key,$fetchrows,$sort);
+
+        $head = librarylink_iframe_header();
+        $foot = librarylink_iframe_footer();
+    
+        if (!is_array($results)) { return $head.'<h3>No results were found</h3>'.$foot; }
+
+        global $use_watermark;
+        $out='';
+        for ($n = 0; $n < count($results); $n++)
+            {
+            if (is_array($results[$n]))
                 {
-                if (is_array($results[$n]))
-                    {
-                    $results[$n] = array_map("i18n_get_translated",$results[$n]);
-                    }
+                $results[$n] = array_map("i18n_get_translated",$results[$n]);
+                $thm_url = get_resource_path($results[$n]['ref'],false,'thm',false,'jpg',true,1,$use_watermark,$results[$n]['file_modified']);
+                $scr_url = get_resource_path($results[$n]['ref'],false,'scr',false,'jpg',true,1,$use_watermark,$results[$n]['file_modified']);
+                $results[$n]['thm_url'] = $thm_url;
+                $results[$n]['scr_url'] = $scr_url;
+                $out.=libraylink_iframe_thumbnail($results[$n]['title'],$thm_url,$scr_url,$results[$n]['ref']);
                 }
-            return $results;
-
-
-            return "Not Implemented";
-        }
+            }
+        return $head.$out.$foot;
+    }

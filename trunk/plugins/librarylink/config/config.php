@@ -6,3 +6,5 @@ $librarylink_hook_debug_file="/home/simona/resourcespace/hook_debug.log";
 
 $librarylink_debug_enable=true;
 $librarylink_debug_file="/home/simona/resourcespace/librarylink.log";
+
+$librarylink_collection_name='LibraryLink';

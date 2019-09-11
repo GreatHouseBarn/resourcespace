@@ -5,7 +5,7 @@
  * Library Link API functions
  */
 
- function lldebug($message)
+function lldebug($message)
     {
         global $librarylink_debug_enable,$librarylink_debug_file;
         if($librarylink_debug_enable)
@@ -17,6 +17,81 @@
                 fclose($fp);
                 }
             }
+    }
+
+function librarylink_execute_api_call($query,$pretty=false)
+    {
+    // Execute the specified API function.
+    $params=array();parse_str($query,$params);
+    if (!array_key_exists("function",$params)) {return false;}
+    $function=$params["function"];
+    if (!function_exists("api_" . $function)) {return false;}
+    
+    // $content_type='json';
+    // if(isset($params["content-type"]))
+    //     {
+    //     $content_type=$params["content-type"];
+    //     unset($params["content-type"]);
+    //     }
+    // if(!in_array($content_type,array('json','raw'))) $content_type='json';
+    
+    // Construct an array of the real params, setting default values as necessary
+    $setparams = array();
+    $n = 0;    
+    $fct = new ReflectionFunction("api_" . $function);
+    foreach ($fct->getParameters() as $fparam)
+        {
+        $paramkey = $n + 1;
+        debug ("API Checking for parameter " . $fparam->getName() . " (param" . $paramkey . ")");
+        if (array_key_exists("param" . $paramkey,$params) && $params["param" . $paramkey] != "")
+            {
+            debug ("API " . $fparam->getName() . " -   value has been passed : '" . $params["param" . $paramkey] . "'");
+            $setparams[$n] = $params["param" . $paramkey];
+            }
+        
+        elseif ($fparam->isOptional())
+            {
+            // Set default value if nothing passed e.g. from API test tool
+            debug ("API " . $fparam->getName() . " -  setting default value = '" . $fparam->getDefaultValue() . "'");
+            $setparams[$n] = $fparam->getDefaultValue();
+            }
+        else
+            {
+             // Set as empty
+            debug ("API " . $fparam->getName() . " -  setting null value = '" . $fparam->getDefaultValue() . "'");
+            $setparams[$n] = "";    
+            }
+        $n++;
+        }
+    
+    debug("API - calling api_" . $function);
+    $result = call_user_func_array("api_" . $function, $setparams);
+    if(is_array($result) or is_object($result) or is_bool($result)) $content_type='json'; else $content_type='raw';
+    
+    if($content_type=='json')
+        {
+        if($pretty)
+            {
+                debug("API: json_encode() using JSON_PRETTY_PRINT");
+                return json_encode($result,(defined('JSON_PRETTY_PRINT')?JSON_PRETTY_PRINT:0));
+            }
+        else
+            {
+                debug("API: json_encode()");
+                $json_encoded_result = json_encode($result);
+
+                if(json_last_error() !== JSON_ERROR_NONE)
+                    {
+                    debug("API: JSON error: " . json_last_error_msg());
+                    debug("API: JSON error when \$result = " . print_r($result, true));
+                    }
+
+                return $json_encoded_result;
+            }
+        }
+
+    if($content_type=='raw') return $result;
+
     }
 
 
@@ -171,7 +246,7 @@ function librarylink_update_ranks($xg_type, $xg_key, $xg_rank)
 
 function librarylink_create_librarylink_collection()
     {
-    global $userref, $collection_allow_creation;
+    global $userref, $collection_allow_creation, $librarylink_collection_name;
     if (checkperm("b") || !$collection_allow_creation)
         {
         return false;
@@ -180,28 +255,25 @@ function librarylink_create_librarylink_collection()
     $found=false;
     for($i=0;$i<count($collections);$i++)
         {
-            if($collections[$i]['name']==='LibraryLink')
+            if($collections[$i]['name']===$librarylink_collection_name)
                 {
                     $found=true;
                     break;
                 }
         }
     
-    if(!$found) { create_collection($userref,'LibraryLink',0); }
+    if(!$found) { create_collection($userref, $librarylink_collection_name, 0); }
     return true;
     }
 
 function is_librarylink_collection($usercollection)
     {
-        global $userref, $collection_allow_creation;
-        if (checkperm("b") || !$collection_allow_creation)
-            {
-            return false;
-            }
+        global $userref, $collection_allow_creation, $librarylink_collection_name;
+        if (checkperm("b") || !$collection_allow_creation) { return false; }
         $collections=get_user_collections($userref);
         for($i=0;$i<count($collections);$i++)
             {
-                if($collections[$i]['ref']==$usercollection and $collections[$i]['name']==='LibraryLink') return true;
+                if($collections[$i]['ref']==$usercollection and $collections[$i]['name']===$librarylink_collection_name) return true;
             }
         return false;       
     }
@@ -210,4 +282,108 @@ function librarylink_get_all_records()
     {
         $records=sql_array("SELECT distinct concat(xgtype,' / ',xgkey) as value from librarylink_link order by xgtype,xgkey");
         return $records;
+    }
+
+function librarylink_get_links_parameters($set_cookies=true)
+    {
+        $links=array();
+        if(isset($_REQUEST['ll_links'])) $ll_links=$_REQUEST['ll_links']; else $ll_links='';
+        if($ll_links!='') 
+            {
+            $links=explode(',',$ll_links);
+            for($i=0;$i<count($links);$i++) {
+                if(false===strpos($links[$i],'|')) unset($links[$i]); //throw away invalid link pairs
+            }
+            $ll_links=implode(',',$links);
+            if($set_cookies) rs_setcookie('ll_links',$ll_links,0,"","",false,false);
+            } else {
+            if(isset($_COOKIE['ll_links'])) $ll_links=$_COOKIE['ll_links']; else $ll_links='';
+  
+            if($ll_links!='') 
+                {
+                $links=explode(',',$ll_links);
+                for($i=0;$i<count($links);$i++) {
+                    if(false===strpos($links[$i],'|')) unset($links[$i]); //throw away invalid link pairs
+                }
+                $ll_links=implode(',',$links);
+                if($set_cookies) rs_setcookie('ll_links',$ll_links,0,"","",false,false);
+                }
+            }
+        sort($links);
+        for($i=0;$i<count($links);$i++)
+            {
+            $tmp=explode('|',$links[$i]);
+            $links[$i]=array();
+            $links[$i]['xg_type']=trim($tmp[0]);
+            $links[$i]['xg_key']=trim($tmp[1]);
+            }
+        return $links;
+    }
+
+function librarylink_iframe_header()
+    {
+        global $baseurl,$css_reload_key;
+        return '<!DOCTYPE html>
+        <html lang="en">	
+        <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
+        <META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <!-- Load jQuery-->
+        <script src="'.$baseurl.'/lib/js/jquery-3.3.1.min.js"></script>
+        <!-- Structure Stylesheet -->
+        <link href="'.$baseurl.'/css/global.css?css_reload_key='.$css_reload_key.'" rel="stylesheet" type="text/css" media="screen,projection,print" />
+        <!-- Colour stylesheet -->
+        <link href="'.$baseurl.'/css/colour.css?css_reload_key='.$css_reload_key.'" rel="stylesheet" type="text/css" media="screen,projection,print" />
+        <!-- Override stylesheet -->
+        <link href="'.$baseurl.'/css/css_override.php?k=&css_reload_key='.$css_reload_key.'" rel="stylesheet" type="text/css" media="screen,projection,print" />
+        </head>
+        <body lang="en" class="librarylink-iframe">
+        ';
+    }
+
+function librarylink_iframe_footer()
+    {
+        return '</body></html>';
+    }
+
+function libraylink_iframe_thumbnail($title,$thm_url,$scr_url,$ref)
+    {
+        return '
+        <div class="ResourcePanel  ArchiveState0  ResourceType1" id="ResourceShell47"     style="height: 274px;">
+        <div class="ResourceTypeIcon fa fa-fw fa-camera" ></div>
+            <a class="ImageWrapper"
+                href="/pages/view.php?search=%21collection59+&k=&modal=&display=thumbs&order_by=collection&offset=0&per_page=48&archive=&sort=ASC&restypes=&recentdaylimit=&foredit=&ref=47"  
+                onClick="return ModalLoad(this,true);" 
+                title="'.$title.'">                                
+                <img border="0" width="174" height="87" style="margin-top:43px;" src="'.$thm_url.'" alt="'.$title.'" />
+            </a>
+            <div class="ResourcePanelInfo AnnotationInfo">&nbsp;</div>
+            <div class="ResourcePanelInfo ResourceTypeField8">
+                <a href="/pages/view.php?search=%21collection59+&k=&modal=&display=thumbs&order_by=collection&offset=0&per_page=48&archive=&sort=ASC&restypes=&recentdaylimit=&foredit=&ref=47"  
+                onClick="return ModalLoad(this,true);" 
+                title="'.$title.'">
+                '.$title.'</a>&nbsp;
+            </div>
+            <div class="clearer"></div>
+            <div class="ResourcePanelIcons">
+                &nbsp;       
+                <!-- Preview icon -->
+                <span class="IconPreview"><a aria-hidden="true" class="fa fa-expand" id= "previewlinkcollection'.$ref.'" href="/pages/preview.php?from=search&ref=47&ext=jpg&search=%21collection59+&offset=0&order_by=collection&sort=ASC&archive=&k=" title="Full screen preview"></a></span>
+                <script>
+                    jQuery(document).ready(function() {
+                    jQuery("#previewlinkcollection'.$ref.'")
+                        .attr("href", "'.$scr_url.'")
+                        .attr("data-title", "'.$title.'")
+                        .attr("data-lightbox", "lightboxcollection")
+                        .attr("onmouseup", "closeModalOnLightBoxEnable();");
+                    });
+                 </script>
+        
+            <div class="clearer"></div>
+        </div>  
+        </div>        
+        ';
     }
