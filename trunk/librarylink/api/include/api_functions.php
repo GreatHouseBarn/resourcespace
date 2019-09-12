@@ -19,7 +19,7 @@ function lldebug($message)
             }
     }
 
-function librarylink_execute_api_call($query,$pretty=false)
+function librarylink_execute_api_call($query,$pretty=true)
     {
     // Execute the specified API function.
     $params=array();parse_str($query,$params);
@@ -211,6 +211,17 @@ function librarylink_delete_links($xg_type, $xg_key, $delete_keywords)
         return true;
     }
 
+function librarylink_get_all_links()
+    {
+        $records=sql_query("SELECT concat(xgtype,' - ',xgkey) as link, ref from librarylink_link order by xgtype,xgkey,xgrank");
+        $result=array();
+        if(count($records))
+            {
+            foreach($records as $r) $result[$r['link']][]=$r['ref'];
+            }
+        return $result;
+    }
+
 function librarylink_do_search($xg_type, $xg_key, $fetchrows, $sort)
     {
         $resources=array();
@@ -339,6 +350,9 @@ function librarylink_iframe_header()
         <link href="'.$baseurl.'/css/colour.css?css_reload_key='.$css_reload_key.'" rel="stylesheet" type="text/css" media="screen,projection,print" />
         <!-- Override stylesheet -->
         <link href="'.$baseurl.'/css/css_override.php?k=&css_reload_key='.$css_reload_key.'" rel="stylesheet" type="text/css" media="screen,projection,print" />
+        <!--- FontAwesome for icons-->
+        <link rel="stylesheet" href="'.$baseurl.'/lib/fontawesome/css/all.min.css?css_reload_key='.$css_reload_key.'">
+        <link rel="stylesheet" href="'.$baseurl.'/lib/fontawesome/css/v4-shims.min.css?css_reload_key='.$css_reload_key.'">
         </head>
         <body lang="en" class="librarylink-iframe">
         ';
@@ -349,20 +363,20 @@ function librarylink_iframe_footer()
         return '</body></html>';
     }
 
-function libraylink_iframe_thumbnail($title,$thm_url,$scr_url,$ref)
+function libraylink_iframe_thumbnail($type,$title,$thm_url,$scr_url,$ref)
     {
         return '
         <div class="ResourcePanel  ArchiveState0  ResourceType1" id="ResourceShell47"     style="height: 274px;">
-        <div class="ResourceTypeIcon fa fa-fw fa-camera" ></div>
+        <div class="ResourceTypeIcon fa fa-fw fa-'.$type.'" ></div>
             <a class="ImageWrapper"
-                href="/pages/view.php?search=%21collection59+&k=&modal=&display=thumbs&order_by=collection&offset=0&per_page=48&archive=&sort=ASC&restypes=&recentdaylimit=&foredit=&ref=47"  
+                href="#"  
                 onClick="return ModalLoad(this,true);" 
                 title="'.$title.'">                                
-                <img border="0" width="174" height="87" style="margin-top:43px;" src="'.$thm_url.'" alt="'.$title.'" />
+                <img border="0" style="margin-top:43px;" src="'.$thm_url.'" alt="'.$title.'" />
             </a>
             <div class="ResourcePanelInfo AnnotationInfo">&nbsp;</div>
             <div class="ResourcePanelInfo ResourceTypeField8">
-                <a href="/pages/view.php?search=%21collection59+&k=&modal=&display=thumbs&order_by=collection&offset=0&per_page=48&archive=&sort=ASC&restypes=&recentdaylimit=&foredit=&ref=47"  
+                <a href="#"  
                 onClick="return ModalLoad(this,true);" 
                 title="'.$title.'">
                 '.$title.'</a>&nbsp;
@@ -371,7 +385,7 @@ function libraylink_iframe_thumbnail($title,$thm_url,$scr_url,$ref)
             <div class="ResourcePanelIcons">
                 &nbsp;       
                 <!-- Preview icon -->
-                <span class="IconPreview"><a aria-hidden="true" class="fa fa-expand" id= "previewlinkcollection'.$ref.'" href="/pages/preview.php?from=search&ref=47&ext=jpg&search=%21collection59+&offset=0&order_by=collection&sort=ASC&archive=&k=" title="Full screen preview"></a></span>
+                <span class="IconPreview"><a aria-hidden="true" class="fa fa-expand" id="previewlinkcollection'.$ref.'" href="#" title="Full screen preview"></a></span>
                 <script>
                     jQuery(document).ready(function() {
                     jQuery("#previewlinkcollection'.$ref.'")
@@ -386,4 +400,125 @@ function libraylink_iframe_thumbnail($title,$thm_url,$scr_url,$ref)
         </div>  
         </div>        
         ';
+    }
+
+function librarylink_iframe_vrview($title, $type, $url, $preview) 
+    {
+    global $baseurl,$css_reload_key;
+    if($type!='image' and $type!='video') return '';
+    return '
+<!DOCTYPE html>
+<html lang="en">    
+<head>
+    <title>'.$title.' - VR view</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <style type="text/css">
+    html, body {
+        height: 100%;
+        width: 100%;
+        margin: 0px;
+        text-align: center;
+    }
+    .container {
+        height: 100%;
+        width: 100%;
+        border: 1px solid black;
+    }
+    iframe { width: 100%; height: 100%; }
+    </style>
+    <script src="'.$baseurl.'/vrview/build/vrview.min.js"></script>
+</head>    
+<body>
+    <h3>'.$title.'</h3>
+    <div id="vrview" class="container"></div>
+    <script>
+    window.addEventListener("load", function() {
+        var vrView = new VRView.Player("#vrview", {
+            '.$type.': "'.$url.'",
+            preview: "'.$preview.'"
+        });
+    });
+    </script>
+</body>    
+</html>
+    ';
+    }
+
+function librarylink_iframe_video($title,$url)
+    {
+    return '
+<!DOCTYPE html>
+<html lang="en">    
+<head>
+    <title>'.$title.'</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+</head>    
+<body>
+    <center>
+    <h3>'.$title.'</h3>
+    <video controls>
+    <source src="'.$url.'" type="video/mp4">
+    Your browser does not support the video tag.
+    </video>
+    </center>
+</body>    
+</html>
+    ';
+    }
+
+function librarylink_iframe_image($title,$url)
+    {
+    return '
+<!DOCTYPE html>
+<html lang="en">    
+<head>
+    <title>'.$title.'</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+</head>    
+<body>
+    <center>  
+    <h3>'.$title.'</h3>
+    <img src="'.$url.'" alt="'.$title.'" title="'.$title.'">
+    </center>
+</body>    
+</html>
+    ';
+    }
+
+function librarylink_iframe_audio($title,$url)
+    {
+    return '
+<!DOCTYPE html>
+<html lang="en">    
+<head>
+    <title>'.$title.'</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+</head>    
+<body>
+    <center>
+    <h3>'.$title.'</h3>
+    <audio controls>
+    <source src="'.$url.'">
+    Your browser does not support the audio tag.
+    </audio>
+    </center>
+</body>    
+</html>
+    ';
     }

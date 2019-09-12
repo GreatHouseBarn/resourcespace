@@ -21,8 +21,19 @@ if($librarylink_hook_debug_enable and !function_exists('hook_modifier'))
 
 function HookLibrarylinkAllAdd_bottom_in_page_nav_left()
     {
-    //print "<p>Hello World - test librarylink hook</p>";
-    //librarylink_create_librarylink_collection();
+    global $librarylink_links;
+    if(isset($_GET['search']))
+        {
+        $search=$_GET['search'];
+        if(preg_match('/^\!collection([0-9]+)/',$search,$m))
+            {
+            $search_collection=$m[1];
+            if(is_librarylink_collection($search_collection))
+                {
+                print nl2br(sql_value(sprintf("select description as value from collection where ref=%s",$search_collection),''));
+                }
+            }
+        }
     return true;
     }
 

@@ -1,6 +1,4 @@
 <?php
-include_once("./api/include/snoopy.class.php");
-
 $api_calls=array(
     // Existing ResourceSpace API endpoints are defined here:
     array("api"=>"---ResourceSpace API Functions:---"),
@@ -41,15 +39,18 @@ $api_calls=array(
     array("api"=>"librarylink_modify_resource_link","ref"=>null,"xg_type"=>null,"xg_key"=>null,"xg_rank"=>null),
     array("api"=>"librarylink_delete_links","xg_type"=>null,"xg_key"=>null,"delete_keywords"=>'"true"'),
     array("api"=>"librarylink_delete_links_by_ref","ref"=>null, "delete_keywords"=>'"true"'),
+    array("api"=>"librarylink_get_all_links"),
     array("api"=>"librarylink_upload_resource","resource_type"=>"1 (Photo)","archive"=>"0 (Active)","no_exif"=>'"false"',"revert"=>'"false"',"autorotate"=>'"false"',"metadata"=>'"" (empty)',"userfile"=>null),
-    array("api"=>"librarylink_do_search","xg_type"=>'"" (empty)',"xg_key"=>'"" (empty)',"fetchrows"=>-1,"sort"=>'"desc"'),
-    array("api"=>"librarylink_do_search_iframe","xg_type"=>'"" (empty)',"xg_key"=>'"" (empty)',"fetchrows"=>-1,"sort"=>'"desc"')
+    array("api"=>"librarylink_do_search","xg_type"=>'"" (empty)',"xg_key"=>'"" (empty)',"fetchrows"=>-1,"sort"=>'"asc"'),
+    array("api"=>"librarylink_do_search_iframe","xg_type"=>'"" (empty)',"xg_key"=>'"" (empty)',"fetchrows"=>-1,"sort"=>'"asc"'),
+    array("api"=>"librarylink_get_resource_iframe", "ref"=>null)
 );
 
 $private_key="ac79b20c58fed01d354ffa2c85fac227b472ed83634195180e4f5bd573fdecdc"; # <---  From RS user edit page for the user to log in as
 $user="api"; # <-- RS username of the user you want to log in as
 
 $api=$_POST['api'];
+if(isset($_GET['api'])) $api=$_GET['api'];
 $param=array();
 $p=0;
 $name='"" (empty)';
@@ -61,7 +62,7 @@ foreach($api_calls as $a) {
     }
 }
 
-if(isset($_POST['Execute'])) {
+if(isset($_POST['Execute']) or isset($_GET['Execute'])) {
     $query='user='.$user.'&function='.$api;
     for($i=1;$i<$p;$i++) {
         if(isset($_POST[$param[$i]['name']])) {
@@ -75,33 +76,35 @@ if(isset($_POST['Execute'])) {
     $query.='&sign='.$sign;
     $query=$_SERVER['HTTP_ORIGIN'].'/librarylink/api/?'.$query;
 
-    if(!isset($_FILES['userfile'])) {
-        # Make the request.
-        $results=file_get_contents($query);
-    } else {
-        $name=$_FILES['userfile']['name'];
-        $dest = dirname(__FILE__).'/upload/'.$name;
-        $tmp_name=$_FILES['userfile']['tmp_name'];
-        if(file_exists($tmp_name)) {        
-            copy($tmp_name, $dest);
-            // initialise the curl request
-            $request = curl_init($query);
-            if (function_exists('curl_file_create')) { // php 5.5+
-                $cFile = curl_file_create($dest);
-            } else { // 
-                $cFile = '@'.$dest.';filename='.$name.';type='. $_FILES['userfile']['type'];
-            }
-            $post=array('userfile'=>$cFile);
-            // send a file
-            curl_setopt($request, CURLOPT_POST, true);
-            curl_setopt($request, CURLOPT_POSTFIELDS, $post);
-            // output the response
-            curl_setopt($request, CURLOPT_RETURNTRANSFER, true);
-            $results=curl_exec($request);
-            // close the session
-            curl_close($request);
-            unlink('./upload/'.$name);
-        } else $results="No uploaded file!";
+    if(!preg_match('/iframe$/',$name)) {
+        if(!isset($_FILES['userfile'])) {
+            # Make the request.
+            $results=file_get_contents($query);
+        } else {
+            $name=$_FILES['userfile']['name'];
+            $dest = dirname(__FILE__).'/upload/'.$name;
+            $tmp_name=$_FILES['userfile']['tmp_name'];
+            if(file_exists($tmp_name)) {        
+                copy($tmp_name, $dest);
+                // initialise the curl request
+                $request = curl_init($query);
+                if (function_exists('curl_file_create')) { // php 5.5+
+                    $cFile = curl_file_create($dest);
+                } else { // 
+                    $cFile = '@'.$dest.';filename='.$name.';type='. $_FILES['userfile']['type'];
+                }
+                $post=array('userfile'=>$cFile);
+                // send a file
+                curl_setopt($request, CURLOPT_POST, true);
+                curl_setopt($request, CURLOPT_POSTFIELDS, $post);
+                // output the response
+                curl_setopt($request, CURLOPT_RETURNTRANSFER, true);
+                $results=curl_exec($request);
+                // close the session
+                curl_close($request);
+                unlink('./upload/'.$name);
+            } else $results="No uploaded file!";
+        }
     }
 }
 
@@ -120,10 +123,10 @@ if(isset($_POST['Execute'])) {
 <?php print $script; ?>
 </head>
 <body lang="en" class="api">
-<form method="post" enctype="multipart/form-data">
+<form method="post" action="api.php" enctype="multipart/form-data">
     <fieldset>
         <legend>Choose an API function:</legend>
-        <select name="api" onclick="this.form.submit();">
+        <select name="api" onchange="this.form.submit();">
         <?php
             for($i=0;$i<count($api_calls);$i++) {
                 $a=$api_calls[$i]['api'];
@@ -158,13 +161,15 @@ if(isset($_POST['Execute'])) {
     <fieldset><legend>Query:</legend>
         <textarea name="query" id="query" rows=5 style="width:100%;"><?php echo htmlspecialchars($query); ?></textarea>
     </fieldset>
-
+<?php if(!preg_match('/iframe$/',$name)) { ?>
     <fieldset><legend>Output:</legend>
-        <textarea name="output" id="output" rows=20 style="width:100%;"><?php echo htmlspecialchars($results); ?></textarea>
+        <textarea name="output" id="output" rows=40 style="width:100%;"><?php echo htmlspecialchars($results); ?></textarea>
     </fieldset>
-
+<?php } else { ?>
     <fieldset><legend>Iframe:</legend>
-        <iframe width="100%" height=300 src="<?php print $query; ?>">Your browser does not support Iframes</iframe>
-    </fieldset>    
+        <iframe width="100%" height=500 src="<?php print $query; ?>">Your browser does not support Iframes</iframe>
+    </fieldset>
+<?php } ?> 
+<pre><?php //print_r($_GET); ?></pre> 
 </body>
 </html>

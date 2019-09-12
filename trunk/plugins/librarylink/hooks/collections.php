@@ -27,6 +27,7 @@ function HookLibrarylinkCollectionsBeforecollectiontoolscolumn()
             print "
             <script>
             function ChangeLLCollection(collection,k,last_collection,searchParams) {
+                jQuery('#ll_save').prop('disabled',true);
                 console.log(\"changecollection\");
                 if(typeof last_collection == 'undefined'){last_collection='';}
                 if(typeof searchParams == 'undefined') {searchParams='';}
@@ -34,13 +35,14 @@ function HookLibrarylinkCollectionsBeforecollectiontoolscolumn()
                 PopCollection(thumbs);
                 // Set the collection and update the count display
                 CollectionDivLoad(baseurl_short + 'pages/collections.php?collection=' + collection + '&thumbs=' + thumbs + '&last_collection=' + last_collection + '&k=' + k + '&ll_save=true&' +searchParams );
+                setTimeout(function(){ message_poll(); jQuery('#ll_save').prop('disabled',false); },1000);
             }
             </script>
             ";
             if(count($links)==1)
                 {
                 print "Linking to 1 Record:";
-                printf("<br />%s /%s<br />\n",$links[0]['xg_type'],$links[0]['xg_key']);
+                printf("<br />%s / %s<br />\n",$links[0]['xg_type'],$links[0]['xg_key']);
                 } else {
                 printf("Linking to %s Records:",count($links));
                 print "<select name=\"ll_link\" readonly>\n";
@@ -66,7 +68,7 @@ function HookLibrarylinkCollectionsPrevent_running_render_actions()
 
 function HookLibrarylinkCollectionsPostchangecollection()
     {
-    global $usercollection,$librarylink_collection_selected;
+    global $usercollection,$librarylink_collection_selected,$userref;
     lldebug("Postchangecollection:".$usercollection);
     if(isset($_REQUEST['ll_save']))
         {
@@ -76,6 +78,9 @@ function HookLibrarylinkCollectionsPostchangecollection()
             $col_resource_ids=array_reverse($col_resource_ids);
             $links=librarylink_get_links_parameters(false);
             $links_count=count($links);
+            $delete_count=0;
+            $add_count=0;
+            $messages=array();
             if($links_count>0)
                 {
                 //build a tally of resources that used to have ALL of the record links
@@ -109,8 +114,11 @@ function HookLibrarylinkCollectionsPostchangecollection()
                         {
                         if(isset($resource_has_links_count[$ref]) and $resource_has_links_count[$ref]==$links_count)
                             {
-                            lldebug("Removing ".$links[$i]['xg_type']." / ".$links[$i]['xg_key']." from resource: $ref");
+                            $message="Removing ".$links[$i]['xg_type']." / ".$links[$i]['xg_key']." from resource: $ref";
+                            lldebug($message);
                             librarylink_delete_resource_link($ref, $links[$i]['xg_type'], $links[$i]['xg_key'], true);
+                            $messages[]=$message;
+                            $delete_count++;
                             }
                         }                            
                     }
@@ -119,10 +127,16 @@ function HookLibrarylinkCollectionsPostchangecollection()
                     {
                     foreach($links as $link)
                         {
-                        lldebug("Adding ".$link['xg_type']." / ".$link['xg_key']." to resource: $ref");          
+                        $message="Adding ".$link['xg_type']." / ".$link['xg_key']." to resource: $ref";
+                        lldebug($message);          
                         librarylink_add_resource_link($ref, $link['xg_type'], $link['xg_key'], 1, true);
+                        $messages[]=$message;
+                        $add_count++;
                         }
                     }
+                $messages[]=sprintf("%s links were deleted and %s links were added successfully.",$delete_count,$add_count);
+                $message=sprintf("<div style=\"width:100%%;\">%s</div>",implode("\n",$messages));
+                message_add(array($userref),$message,'',$userref,MESSAGE_ENUM_NOTIFICATION_TYPE_SCREEN);
 
                 } //no links
             } //not the ll collection
