@@ -19,6 +19,8 @@ if($librarylink_hook_debug_enable and !function_exists('hook_modifier'))
         }
     }
 
+
+
 function HookLibrarylinkAllAdd_bottom_in_page_nav_left()
     {
     global $librarylink_links;
@@ -42,4 +44,9 @@ function HookLibraryLinkAllBeforedeleteresourcefromdb($ref)
         lldebug("Hook: Beforedeleteresourcefromdb was called.");
         librarylink_delete_links_by_ref($ref, false);
         return true;
+    }
+
+function HookLibrarylinkAllBefore_footer_always()
+    {
+        print "<div class=\"ll_footer\">LibraryLink is powered by ResourceSpace</div>";
     }
