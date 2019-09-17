@@ -9,8 +9,8 @@ if($librarylink_hook_debug_enable and !function_exists('hook_modifier'))
             global $librarylink_hook_debug_file;
             if($fp=fopen($librarylink_hook_debug_file,'a'))
                 {
-                if($pagename!='') fwrite($fp,"-----------------------------------------------------------------$pagename\n");
-                fwrite($fp,"Hook Name: $name\n");
+                //if($pagename!='') fwrite($fp,"-----------------------------------------------------------------$pagename\n");
+                fwrite($fp,"Hook Name: $name ");
                 fwrite($fp,"Page Name: $pagename\n");
                 //fwrite($fp,"Params: ".print_r($params,1)."\n");
                 fclose($fp);
