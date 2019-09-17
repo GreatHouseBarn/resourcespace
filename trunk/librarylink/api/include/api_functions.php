@@ -5,13 +5,14 @@
  * Library Link API functions
  */
 
-function lldebug($message)
+function lldebug($message, $title='')
     {
         global $librarylink_debug_enable,$librarylink_debug_file;
         if($librarylink_debug_enable)
             {
             if($fp=fopen($librarylink_debug_file,'a'))
                 {
+                if($title!='') fwrite($fp,"$title :");
                 if(!is_array($message) and !is_object($message)) fwrite($fp,$message."\n");
                 else fwrite($fp,print_r($message,1));
                 fclose($fp);
@@ -249,6 +250,19 @@ function librarylink_do_search($xg_type, $xg_key, $fetchrows, $sort)
         return $resources;
     }
 
+function librarylink_get_ranks($xg_type, $xg_key)
+    {
+        $resources=array();
+        if($xg_type=="" or $xg_key=="") { return $resources; }        
+        $links = sql_query(sprintf("SELECT ref,xgrank from librarylink_link where xgtype='%s' and xgkey='%s' order by xgrank asc",escape_check($xg_type),escape_check($xg_key)));
+        if(count($links)===0) { return $resources; }
+        foreach($links as $link)
+            {
+            $resources[$link['ref']]=$link['xgrank'];
+            }
+        return $resources;        
+    }
+
 function librarylink_update_ranks($xg_type, $xg_key, $xg_rank)
     {
         if(!preg_match('/^[0-9]+$/',$xg_rank)) $xg_rank=1;
@@ -460,11 +474,16 @@ function librarylink_iframe_video($title,$url)
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <style type="text/css">
+        .video {
+            max-height: 400px;
+        }
+    </style>
 </head>    
 <body>
     <center>
     <h3>'.$title.'</h3>
-    <video controls>
+    <video class="video" controls>
     <source src="'.$url.'" type="video/mp4">
     Your browser does not support the video tag.
     </video>
@@ -486,6 +505,11 @@ function librarylink_iframe_image($title,$url)
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <style type="text/css">
+        img {
+            max-height: 400px;
+        }
+    </style>
 </head>    
 <body>
     <center>  
@@ -497,7 +521,7 @@ function librarylink_iframe_image($title,$url)
     ';
     }
 
-function librarylink_iframe_audio($title,$url)
+function librarylink_iframe_audio($title,$url,$preview)
     {
     return '
 <!DOCTYPE html>
@@ -509,6 +533,15 @@ function librarylink_iframe_audio($title,$url)
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <style type="text/css">
+        body {
+            background-image: url("'.$preview.'");
+            background-repeat: no-repeat;
+            background-size: auto 100%;
+            background-position: center bottom;
+            min-height:400px;
+        }
+    </style>
 </head>    
 <body>
     <center>
