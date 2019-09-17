@@ -68,7 +68,15 @@ $offline_job_prefixes = array("ffmpeg","im-convert","im-mogrify","ghostscript","
 #  - This setting may be overridden if previews are required at upload time e.g. if Google Vision facial recognition is configured with a dependent field
 $enable_thumbnail_creation_on_upload = false;
 
+$collections_footer = true;
+$collections_delete_empty=true;
 
+# All user permissions for the dash are revoked and the dash admin can manage a single dash for all users. 
+# Only those with admin privileges can modify the dash and this must be done from the Team Centre > Manage all user dash tiles (One dash for all)
+$managed_home_dash = true;
+# Allows Dash Administrators to have their own dash whilst all other users have the managed dash ($managed_home_dash must be on)
+$unmanaged_home_dash_admins = true;
+$no_welcometext = true;
 /*
 
 New Installation Defaults
