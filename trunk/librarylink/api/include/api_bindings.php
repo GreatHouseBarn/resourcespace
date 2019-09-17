@@ -187,7 +187,9 @@ function api_librarylink_get_resource_iframe($ref)
                 break;
             case 4: //audio
                 $url = get_resource_path($resource['ref'],false,'',true,'mp3',true,1,false);
-                $out=librarylink_iframe_audio($title,$url);
+                if($resource['has_image']==1) $preview = get_resource_path($resource['ref'],false,'pre',true,'jpg',true,1,$use_watermark,$resource['file_modified']);
+                else $preview=sprintf('%s/gfx/no_preview/extension/%s.png',$baseurl,$resource['file_extension']);
+                $out=librarylink_iframe_audio($title,$url,$preview);
                 break;
         }
 
