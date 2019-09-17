@@ -47,14 +47,18 @@ function HookLibrarylinkSearchMoresearchcriteria()
             sql_query(sprintf("update collection set description='%s' where ref=%s",escape_check($collection_description),$collection));
         $resources=array_unique($resources);
         //lldebug($resources);
-        if(count($resources)) 
-            { 
+        if(count($resources)) //we have some resources linked to the the record(s)
+            {
+            $col_count=sql_value(sprintf("select count(resource) as value from collection_resource where collection=%s",$collection),0);
+            if($col_count===0) //if the collection is empty then fill it
+                {
                 $order=1;
                 foreach($resources as $resource) 
-                    {
+                    {                    
                     lldebug("Adding resource: $resource to collection: $collection");
                     sql_query(sprintf("insert into collection_resource(resource,collection,sortorder) values ('%s','%s','%s')",escape_check($resource),escape_check($collection),$order++));
                     }
+                }
             }
         if(isset($_REQUEST['ll_links'])) //have links been provided in the URL?
             {
