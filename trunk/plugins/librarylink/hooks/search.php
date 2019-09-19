@@ -19,48 +19,95 @@ function HookLibrarylinkSearchMoresearchcriteria()
     
     if($collection>0)
         {
-        if(isset($_REQUEST['ll_links'])) //only empty the collection if we've been given a ll_links URL param
-            {
-            $collection_description="This is the LibraryLink collection which is currently not holding any linked record resources.\n";
-            sql_query(sprintf("update collection set description='%s' where ref=%s",escape_check($collection_description),$collection));
-            sql_query("delete from collection_resource where collection='$collection'");
-            sql_query("delete from collection_keyword where collection='$collection'");
-            lldebug("Collection emptied!");
-            }
+        //only empty the collection if we've been given a ll_links URL param
+        if(isset($_REQUEST['ll_links'])) { librarylink_empty_librarylink_collection($collection); }
         } else {
-        $collection=create_collection($userref,'LibraryLink',0);
-        lldebug("Collection created!");
+        $collection=librarylink_create_librarylink_collection();
         }
 
-    $librarylink_links=librarylink_get_links_parameters();
-    if(count($librarylink_links)>0)
+    //get our request or cookie ll_links
+    $links=librarylink_get_links_parameters();
+    if(count($links)>0)
         {            
         $collection_description="This is the LibraryLink collection which is currently holding resources that are linked to the following records:\n";
         //get the resources only that have ALL the links supplied
-        foreach($librarylink_links as $link)
+        foreach($links as $link)
             {
             $resource_ids = sql_array(sprintf("SELECT ref as value from librarylink_link where xgtype='%s' and xgkey='%s' order by xgrank asc",escape_check($link['xg_type']),escape_check($link['xg_key'])));
             if(!isset($resources)) $resources=$resource_ids;
             $resources=array_intersect($resource_ids,$resources);
             $collection_description.=sprintf("Record Type: '%s', Record Key: '%s'\n",$link['xg_type'],$link['xg_key']);
             }
-            sql_query(sprintf("update collection set description='%s' where ref=%s",escape_check($collection_description),$collection));
+        sql_query(sprintf("update collection set description='%s' where ref=%s",escape_check($collection_description),$collection));
         $resources=array_unique($resources);
-        lldebug($resources);
+        lldebug("Moresearchcriteria:");
+        // lldebug($resources);
+        // lldebug($_REQUEST);
         if(count($resources)) //we have some resources linked to the the record(s)
             {
-            $col_count=sql_value(sprintf("select count(resource) as value from collection_resource where collection=%s",$collection),0);
-            lldebug($col_count);
-            if($col_count==0) //if the collection is empty then fill it
+            $col_res_ids=sql_array(sprintf("select resource as value from collection_resource where collection=%s",$collection));
+            $intersect=array_intersect($resources,$col_res_ids);
+            if(count($intersect)!=count($resources) || count($intersect)!=count($col_res_ids))
                 {
-                $order=1;
-                foreach($resources as $resource) 
-                    {                    
-                    lldebug("Adding resource: $resource to collection: $collection");
-                    sql_query(sprintf("insert into collection_resource(resource,collection,sortorder) values ('%s','%s','%s')",escape_check($resource),escape_check($collection),$order++));
+                    librarylink_empty_librarylink_collection($collection);
+                    $order=1;
+                    foreach($resources as $resource) 
+                        {                    
+                        lldebug("Adding resource: $resource to collection: $collection");
+                        sql_query(sprintf("insert into collection_resource(resource,collection,sortorder) values ('%s','%s','%s')",escape_check($resource),escape_check($collection),$order++));
+                        }
+                }
+            // $col_count=sql_value(sprintf("select count(resource) as value from collection_resource where collection=%s",$collection),0);
+            // lldebug($col_count);
+            // if($col_count==0) //if the collection is empty then fill it
+            //     {
+            //     $order=1;
+            //     foreach($resources as $resource) 
+            //         {                    
+            //         lldebug("Adding resource: $resource to collection: $collection");
+            //         sql_query(sprintf("insert into collection_resource(resource,collection,sortorder) values ('%s','%s','%s')",escape_check($resource),escape_check($collection),$order++));
+            //         }
+            //     }
+            }
+
+
+        if (checkperm("h"))
+            {
+            $reorder=getvalescaped("reorder",false);
+            if ($reorder)
+                {
+                $neworder=json_decode(getvalescaped("order",false));
+                // lldebug($col_resource_ids,'collection');
+                // lldebug($neworder,'collection new order');
+                $diff=array();
+                $col_resource_ids=get_collection_resources($collection);
+                for($i=0;$i<count($neworder);$i++)
+                    {
+                    if($col_resource_ids[$i]!=$neworder[$i]) $diff[]=$neworder[$i];
+                    }
+                // lldebug($diff,'diff');
+                if(count($links)>0)
+                    {
+                    foreach($links as $link)
+                        {
+                        $resources=librarylink_get_ranks($link['xg_type'], $link['xg_key']);
+                        foreach($resources as $ref=>$rank) { if(!in_array($ref,$diff)) unset($resources[$ref]); }
+                        lldebug($resources,'resource existing ranks');
+                        $newranks=array();
+                        $i=0;
+                        foreach($resources as $ref=>$rank) 
+                            {
+                            $newranks[$diff[$i]]=$rank; 
+                            $id=librarylink_modify_resource_link($diff[$i++], $link['xg_type'], $link['xg_key'], $rank);
+                            // lldebug($id);
+                            }
+                        lldebug($newranks,'resource new ranks');
+                        }
                     }
                 }
             }
+
+
         if(isset($_REQUEST['ll_links'])) //have links been provided in the URL?
             {
             if(!isset($_GET['search']) or (isset($_GET['search']) and $_GET['search']=='')) //and an empty search phrase?
@@ -73,4 +120,12 @@ function HookLibrarylinkSearchMoresearchcriteria()
         }
 
         return true;
+    }
+
+
+function HookLibrarylinkSearchbeforereturnresults($params)
+    {
+    //lldebug("BeforeSearchResults:");
+    //lldebug($params);
+    //lldebug($_REQUEST);
     }

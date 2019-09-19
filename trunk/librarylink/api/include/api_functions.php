@@ -287,8 +287,20 @@ function librarylink_create_librarylink_collection()
                 }
         }
     
-    if(!$found) { create_collection($userref, $librarylink_collection_name, 0); }
-    return true;
+    if(!$found) { $collection=create_collection($userref, $librarylink_collection_name, 0); }
+    lldebug("Collection $collection created!");
+    return $collection;
+    }
+
+function librarylink_empty_librarylink_collection($collection)
+    {
+        if(!preg_match('/^[0-9]+$/',$collection)) return false;
+        $collection_description="This is the LibraryLink collection which is currently not holding any linked record resources.\n";
+        sql_query(sprintf("update collection set description='%s' where ref=%s",escape_check($collection_description),$collection));
+        sql_query("delete from collection_resource where collection='$collection'");
+        sql_query("delete from collection_keyword where collection='$collection'");
+        lldebug("Collection: $collection emptied!");
+        return true;
     }
 
 function is_librarylink_collection($usercollection)

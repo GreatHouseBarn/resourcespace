@@ -9,7 +9,7 @@ function HookLibrarylinkCollectionsThumbsmenu()
 
 function HookLibrarylinkCollectionsBeforecollectiontoolscolumn()
     {
-    global $usercollection,$librarylink_collection_selected;
+    global $usercollection,$librarylink_collection_selected,$librarylink_auto_refresh_collection_bottom;
     
     $librarylink_collection_selected=false;
     if(is_librarylink_collection($usercollection))
@@ -33,6 +33,8 @@ function HookLibrarylinkCollectionsBeforecollectiontoolscolumn()
             // }
             // </script>
             // ";
+            if($librarylink_auto_refresh_collection_bottom) print "
+            <script>setTimeout(function(){UpdateCollectionDisplay('');},20000);</script>\n";
             if(count($links)==1)
                 {
                 print "Linking to 1 Record:";

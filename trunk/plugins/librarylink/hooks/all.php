@@ -23,7 +23,7 @@ if($librarylink_hook_debug_enable and !function_exists('hook_modifier'))
 
 function HookLibrarylinkAllAdd_bottom_in_page_nav_left()
     {
-    global $librarylink_links;
+    global $librarylink_links,$librarylink_auto_refresh_collection_top;
     if(isset($_GET['search']))
         {
         $search=$_GET['search'];
@@ -33,6 +33,8 @@ function HookLibrarylinkAllAdd_bottom_in_page_nav_left()
             if(is_librarylink_collection($search_collection))
                 {
                 print nl2br(sql_value(sprintf("select description as value from collection where ref=%s",$search_collection),''));
+                if($librarylink_auto_refresh_collection_top) print "
+                <script>setTimeout(function(){UpdateResultOrder();},20000);</script>\n";
                 }
             }
         }
