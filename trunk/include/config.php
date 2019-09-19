@@ -40,7 +40,7 @@ $calibre_path="/usr/bin";
 $calibre_extensions=array("epub","mobi","lrf","pdb","chm","cbr","cbz");
 
 
-$debug_log_location="/home/simona/resourcespace/resourcespace.log";
+$debug_log_location="/home/simona/resourcespace/logs/resourcespace.log";
 # Suppress SQL information in the debug log?
 $suppress_sql_log = true;
 $debug_log=false;
@@ -217,3 +217,17 @@ $relate_on_upload_default=false;
 #Size of the related resource previews on the resource page. Usually requires some restyling (#RelatedResources .CollectionPanelShell)
 #Takes the preview code such as "col","thm"
 $related_resource_preview_size="col";
+
+
+# Create file checksums?
+$file_checksums=true;
+
+# Calculate checksums on first 50k and size if true or on the full file if false
+$file_checksums_50k = true;
+
+# Block duplicate files based on checksums? (has performance impact). May not work reliably with $file_checksums_offline=true unless checksum script is run frequently. 
+$file_upload_block_duplicates=true;
+
+# checksums will not be generated in realtime; a background cron job must be used
+# recommended if files are large, since the checksums can take time
+$file_checksums_offline = true;
