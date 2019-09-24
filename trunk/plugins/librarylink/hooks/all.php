@@ -1,4 +1,5 @@
 <?php
+include_once(__DIR__."/../../../include/collections_functions.php");
 include_once(__DIR__."/../../../librarylink/api/include/api_functions.php");
 
 global $librarylink_hook_debug_enable;
@@ -19,7 +20,50 @@ if($librarylink_hook_debug_enable and !function_exists('hook_modifier'))
         }
     }
 
+// function HookLibrarylinkAllHandleuserref($params)
+//     {
+//     lldebug("Handleuserref");
+//     lldebug($params);
+//     }
 
+function HookLibrarylinkAllAfterregisterplugin($params='')
+    {
+    if($params=='librarylink')
+        {
+        lldebug("-----------------------------------------------------------");
+        lldebug("Afterregisterplugin");
+        global $userref, $collection_allow_creation, $links_changed, $baseurl;
+        if(!checkperm("LL")) { return true; } //no LibraryLink permissions
+        if (checkperm("b") || !$collection_allow_creation) { return true; }; //no bottom collection bar or create collection permissions
+        db_begin_transaction();
+        $collection_ids=librarylink_get_linked_collections();
+        librarylink_remove_linked_collections_from_user($userref,$collection_ids); //remove any collection we can see
+        $links=librarylink_get_link_parameters();
+        if(count($links)>0)
+            {
+            foreach($links as $link) //make sure each specified collection exists and is visible to the user
+                {
+                if(!$collection_id=librarylink_get_linked_collection($link['xg_type'], $link['xg_key']))
+                    {
+                    $collection_id=librarylink_create_linked_collection($link['xg_type'], $link['xg_key'], $link['label']);
+                    }
+                if($collection_id) { librarylink_add_user_to_linked_collection($collection_id); }
+                }
+            }
+            db_end_transaction();
+
+        if($links_changed)
+            {
+            if(!isset($_GET['search']) or (isset($_GET['search']) and $_GET['search']=='')) //and an empty search phrase?
+                {
+                $redirect=sprintf("%/search.php?search=!collection%s",$baseurl,$collection_id);
+                header('Location: '.$redirect); //redirect to showing the librarylink collection
+                exit;
+                }
+            }
+
+        }
+    }
 
 function HookLibrarylinkAllAdd_bottom_in_page_nav_left()
     {
@@ -51,4 +95,10 @@ function HookLibraryLinkAllBeforedeleteresourcefromdb($ref)
 function HookLibrarylinkAllBefore_footer_always()
     {
         print "<div class=\"ll_footer\">LibraryLink is powered by ResourceSpace</div>";
+    }
+
+function HookLibraryLinkAllModified_collections($params)
+    {
+        lldebug("Modified_collections");
+        lldebug($params);
     }

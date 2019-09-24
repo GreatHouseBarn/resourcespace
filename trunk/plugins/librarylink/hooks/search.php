@@ -1,6 +1,28 @@
 <?php
 include_once(__DIR__."/../../../librarylink/api/include/api_functions.php");
 
+// function HookLibrarylinkSearchMoresearchcriteria()
+//     {
+//     global $librarylink_links, $userref, $collection_allow_creation, $baseurl;
+//     lldebug("Moresearchcriteria(");
+//     if(!checkperm("LL")) { return true; } //no LibraryLink permissions
+//     if (checkperm("b") || !$collection_allow_creation) { return true; }; //no bottom collection bar or create collection permissions
+//     $links=librarylink_get_link_parameters();
+//     if(count($links)>0)
+//         {
+//         foreach($links as $link) //make sure each collection exists and is visible to the user
+//             {
+//             if(!$collection_id=librarylink_get_linked_collection($link['xg_type'], $link['xg_key']))
+//                 {
+//                 $collection_id=librarylink_create_linked_collection($link['xg_type'], $link['xg_key'], $link['label']);
+//                 lldebug("Created collection with id: $collection_id");
+//                 }
+//             if($collection_id) { librarylink_add_user_to_linked_collection($collection_id); }
+//             }
+//         }
+//     }
+
+/*
 function HookLibrarylinkSearchMoresearchcriteria()
     {
     global $librarylink_links, $userref, $collection_allow_creation, $baseurl;
@@ -121,7 +143,7 @@ function HookLibrarylinkSearchMoresearchcriteria()
 
         return true;
     }
-
+*/
 
 function HookLibrarylinkSearchbeforereturnresults($params)
     {

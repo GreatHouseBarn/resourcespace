@@ -10,172 +10,249 @@ function HookLibrarylinkCollectionsThumbsmenu()
 function HookLibrarylinkCollectionsBeforecollectiontoolscolumn()
     {
     global $usercollection,$librarylink_collection_selected,$librarylink_auto_refresh_collection_bottom;
-    
+    lldebug("-----------------------------------------------------------");
+    lldebug("Beforecollectiontoolscolumn");    
     $librarylink_collection_selected=false;
-    if(is_librarylink_collection($usercollection))
+    if(librarylink_is_linked_collection($usercollection))
         {
         $librarylink_collection_selected=true;
-        $links=librarylink_get_links_parameters(false);
+        $links=librarylink_get_link_parameters(false);
         if(count($links)>0)
             {
-            // print "
-            // <script>
-            // function ChangeLLCollection(collection,k,last_collection,searchParams) {
-            //     jQuery('#ll_save').prop('disabled',true);
-            //     console.log(\"changecollection\");
-            //     if(typeof last_collection == 'undefined'){last_collection='';}
-            //     if(typeof searchParams == 'undefined') {searchParams='';}
-            //     thumbs = getCookie(\"thumbs\");
-            //     PopCollection(thumbs);
-            //     // Set the collection and update the count display
-            //     CollectionDivLoad(baseurl_short + 'pages/collections.php?collection=' + collection + '&thumbs=' + thumbs + '&last_collection=' + last_collection + '&k=' + k + '&ll_save=true&' +searchParams );
-            //     setTimeout(function(){ message_poll(); jQuery('#ll_save').prop('disabled',false); },1000);
-            // }
-            // </script>
-            // ";
-            if($librarylink_auto_refresh_collection_bottom) print "
-            <script>setTimeout(function(){UpdateCollectionDisplay('');},20000);</script>\n";
+            // if($librarylink_auto_refresh_collection_bottom) print "
+            // <script>setTimeout(function(){UpdateCollectionDisplay('');},20000);</script>\n";
             if(count($links)==1)
                 {
-                print "Linking to 1 Record:";
-                printf("<br />%s / %s<br />\n",$links[0]['xg_type'],$links[0]['xg_key']);
+                printf("1 Record of type: %s",$links[0]['xg_type']);
+                printf("<br />%s%s<br />\n",$links[0]['xg_key'],' ('.$links[0]['label'].')');
                 } else {
-                printf("Linking to %s Records:",count($links));
+                printf("%s Records of type: %s",count($links),$links[0]['xg_type']);
                 print "<select name=\"ll_link\" readonly>\n";
                 foreach($links as $link)
                     {
-                    $value=sprintf("%s / %s\n",$link['xg_type'],$link['xg_key']);
+                    $value=sprintf("%s%s\n",$link['xg_key'],' ('.$link['label'].')');
                     printf("<option value=\"%s\" readonly>%s</option>\n",$value,$value);
                     }
                 print "</select>\n";
                 }            
-                // printf("<input type=\"submit\" name=\"ll_save\" value=\"Save Links\" onclick=\"ChangeLLCollection(%s, '');\">\n",$usercollection);
             } else print "Not currently linked to any record.";
         return false;
         }
     return true;
     }
 
+// function HookLibrarylinkCollectionsAftercollectionsrenderactions()
+//     {
+//     global $librarylink_links, $userref, $collection_allow_creation, $baseurl;
+//     lldebug("Aftercollectionsrenderactions");
+//     //if(!checkperm("LL")) { return true; } //no LibraryLink permissions
+//     //if (checkperm("b") || !$collection_allow_creation) { return true; }; //no bottom collection bar or create collection permissions
+//     $links=librarylink_get_link_parameters(false);
+//     lldebug($links);
+//     if(count($links)>0)
+//         {
+//         foreach($links as $link) //make sure each collection exists and is visible to the user
+//             {
+//             $collection_id=librarylink_get_linked_collection($link['xg_type'], $link['xg_key']);
+//             if($collection_id) { librarylink_remove_user_from_linked_collection($collection_id); }
+//             }
+//         }
+//     }
+
+
+// function HookLibrarylinkCollectionsBeforecollectiontoolscolumn()
+//     {
+//     global $usercollection,$librarylink_collection_selected,$librarylink_auto_refresh_collection_bottom;
+    
+//     $librarylink_collection_selected=false;
+//     if(is_librarylink_collection($usercollection))
+//         {
+//         $librarylink_collection_selected=true;
+//         $links=librarylink_get_links_parameters(false);
+//         if(count($links)>0)
+//             {
+//             // print "
+//             // <script>
+//             // function ChangeLLCollection(collection,k,last_collection,searchParams) {
+//             //     jQuery('#ll_save').prop('disabled',true);
+//             //     console.log(\"changecollection\");
+//             //     if(typeof last_collection == 'undefined'){last_collection='';}
+//             //     if(typeof searchParams == 'undefined') {searchParams='';}
+//             //     thumbs = getCookie(\"thumbs\");
+//             //     PopCollection(thumbs);
+//             //     // Set the collection and update the count display
+//             //     CollectionDivLoad(baseurl_short + 'pages/collections.php?collection=' + collection + '&thumbs=' + thumbs + '&last_collection=' + last_collection + '&k=' + k + '&ll_save=true&' +searchParams );
+//             //     setTimeout(function(){ message_poll(); jQuery('#ll_save').prop('disabled',false); },1000);
+//             // }
+//             // </script>
+//             // ";
+//             if($librarylink_auto_refresh_collection_bottom) print "
+//             <script>setTimeout(function(){UpdateCollectionDisplay('');},20000);</script>\n";
+//             if(count($links)==1)
+//                 {
+//                 print "Linking to 1 Record:";
+//                 printf("<br />%s / %s<br />\n",$links[0]['xg_type'],$links[0]['xg_key']);
+//                 } else {
+//                 printf("Linking to %s Records:",count($links));
+//                 print "<select name=\"ll_link\" readonly>\n";
+//                 foreach($links as $link)
+//                     {
+//                     $value=sprintf("%s / %s\n",$link['xg_type'],$link['xg_key']);
+//                     printf("<option value=\"%s\" readonly>%s</option>\n",$value,$value);
+//                     }
+//                 print "</select>\n";
+//                 }            
+//                 // printf("<input type=\"submit\" name=\"ll_save\" value=\"Save Links\" onclick=\"ChangeLLCollection(%s, '');\">\n",$usercollection);
+//             } else print "Not currently linked to any record.";
+//         return false;
+//         }
+//     return true;
+//     }
+
 function HookLibrarylinkCollectionsPrevent_running_render_actions()
     {
     global $librarylink_collection_selected;
+    //lldebug("Prevent_running_render_actions");
     return $librarylink_collection_selected; //disable actions if in  LibraryLink collection
     }
 
-function HookLibrarylinkCollectionsPostaddtocollection()
-    {
-    global $usercollection,$librarylink_collection_selected,$userref,$add;
-    lldebug("Postaddtocollection:".$usercollection);
-    lldebug("Add resource: $add");
-    if(is_librarylink_collection($usercollection) and $add>0)
-        {
-        $links=librarylink_get_links_parameters(false);
-        if(count($links)>0)
-            {
-            foreach($links as $link)
-                {
-                $message="Adding ".$link['xg_type']." / ".$link['xg_key']." to resource: $add";
-                lldebug($message);          
-                $id=librarylink_add_resource_link($add, $link['xg_type'], $link['xg_key'], 1, true);
-                lldebug($id);
-                $resources=librarylink_get_ranks($link['xg_type'], $link['xg_key']);
-                lldebug($resources);
-                }
-            }
-        }
-    }
+// function HookLibrarylinkCollectionsPostaddtocollection()
+//     {
+//     global $usercollection,$librarylink_collection_selected,$userref,$add;
+//     lldebug("Postaddtocollection:".$usercollection);
+//     lldebug("Add resource: $add");
+//     if(is_librarylink_collection($usercollection) and $add>0)
+//         {
+//         $links=librarylink_get_links_parameters(false);
+//         if(count($links)>0)
+//             {
+//             foreach($links as $link)
+//                 {
+//                 $message="Adding ".$link['xg_type']." / ".$link['xg_key']." to resource: $add";
+//                 lldebug($message);          
+//                 $id=librarylink_add_resource_link($add, $link['xg_type'], $link['xg_key'], 1, true);
+//                 lldebug($id);
+//                 $resources=librarylink_get_ranks($link['xg_type'], $link['xg_key']);
+//                 lldebug($resources);
+//                 }
+//             }
+//         }
+//     }
 
-function HookLibrarylinkCollectionsPostremovefromcollection()
-    {
-    global $usercollection,$librarylink_collection_selected,$userref,$remove;
-    lldebug("Postremovefromcollection:".$usercollection);
-    lldebug("Remove resource: $remove");
-    if(is_librarylink_collection($usercollection) and $remove>0)
-        {
-        $links=librarylink_get_links_parameters(false);
-        if(count($links)>0)
-            {
-            foreach($links as $link)
-                {
-                $message="Removing ".$link['xg_type']." / ".$link['xg_key']." from resource: $remove";
-                lldebug($message);
-                librarylink_delete_resource_link($remove, $link['xg_type'], $link['xg_key'], true);
-                $resources=librarylink_get_ranks($link['xg_type'], $link['xg_key']);
-                lldebug($resources);
+// function HookLibrarylinkCollectionsPostremovefromcollection()
+//     {
+//     global $usercollection,$librarylink_collection_selected,$userref,$remove;
+//     lldebug("Postremovefromcollection:".$usercollection);
+//     lldebug("Remove resource: $remove");
+//     if(is_librarylink_collection($usercollection) and $remove>0)
+//         {
+//         $links=librarylink_get_links_parameters(false);
+//         if(count($links)>0)
+//             {
+//             foreach($links as $link)
+//                 {
+//                 $message="Removing ".$link['xg_type']." / ".$link['xg_key']." from resource: $remove";
+//                 lldebug($message);
+//                 librarylink_delete_resource_link($remove, $link['xg_type'], $link['xg_key'], true);
+//                 $resources=librarylink_get_ranks($link['xg_type'], $link['xg_key']);
+//                 lldebug($resources);
 
-                }
-            }
-        }       
-    }
+//                 }
+//             }
+//         }       
+//     }
+
 
 // function HookLibrarylinkCollectionsPrechangecollection()
 //     {
-//     global $usercollection,$librarylink_collection_selected,$userref;
+//     global $usercollection,$librarylink_links, $userref, $collection_allow_creation, $baseurl;
 //     lldebug("Prechangecollection:".$usercollection);
-//     if(is_librarylink_collection($usercollection))
+//     if(!checkperm("LL")) { return true; } //no LibraryLink permissions
+//     if (checkperm("b") || !$collection_allow_creation) { return true; }; //no bottom collection bar or create collection permissions
+//     $links=librarylink_get_link_parameters(false);
+//     if(count($links)>0)
 //         {
-//         $col_resource_ids=get_collection_resources($usercollection);
-//         // $col_resource_ids=array_reverse($col_resource_ids);
-//         lldebug($col_resource_ids);
+//         foreach($links as $link) //make sure each collection exists and is visible to the user
+//             {
+//             if(!$collection_id=librarylink_get_linked_collection($link['xg_type'], $link['xg_key']))
+//                 {
+//                 $collection_id=librarylink_create_linked_collection($link['xg_type'], $link['xg_key'], $link['label']);
+//                 lldebug("Created collection with id: $collection_id");
+//                 }
+//             if($collection_id) { librarylink_add_user_to_linked_collection($collection_id); }
+//             }
 //         }
 //     }
 
-// function HookLibrarylinkCollectionsCollections_thumbs_loaded()
+
+// // function HookLibrarylinkCollectionsPrechangecollection()
+// //     {
+// //     global $usercollection,$librarylink_collection_selected,$userref;
+// //     lldebug("Prechangecollection:".$usercollection);
+// //     if(is_librarylink_collection($usercollection))
+// //         {
+// //         $col_resource_ids=get_collection_resources($usercollection);
+// //         // $col_resource_ids=array_reverse($col_resource_ids);
+// //         lldebug($col_resource_ids);
+// //         }
+// //     }
+
+// // function HookLibrarylinkCollectionsCollections_thumbs_loaded()
+// //     {
+// //     global $usercollection,$librarylink_collection_selected,$userref;
+// //     lldebug("Collections_thumbs_loaded:".$usercollection);
+// //     if(is_librarylink_collection($usercollection))
+// //         {
+// //         $col_resource_ids=get_collection_resources($usercollection);
+// //         // $col_resource_ids=array_reverse($col_resource_ids);
+// //         lldebug($col_resource_ids);
+// //         }
+// //     }
+
+// function HookLibrarylinkCollectionsPostchangecollection()
 //     {
 //     global $usercollection,$librarylink_collection_selected,$userref;
-//     lldebug("Collections_thumbs_loaded:".$usercollection);
+//     lldebug("Postchangecollection:".$usercollection);
 //     if(is_librarylink_collection($usercollection))
 //         {
 //         $col_resource_ids=get_collection_resources($usercollection);
-//         // $col_resource_ids=array_reverse($col_resource_ids);
-//         lldebug($col_resource_ids);
+//         $links=librarylink_get_links_parameters(false);
+//         if (checkperm("h"))
+//             {
+//             $reorder=getvalescaped("reorder",false);
+//             if ($reorder)
+//                 {
+//                 $neworder=json_decode(getvalescaped("order",false));
+//                 // lldebug($col_resource_ids,'collection');
+//                 // lldebug($neworder,'collection new order');
+//                 $diff=array();
+//                 for($i=0;$i<count($neworder);$i++)
+//                     {
+//                     if($col_resource_ids[$i]!=$neworder[$i]) $diff[]=$neworder[$i];
+//                     }
+//                 // lldebug($diff,'diff');
+
+//                 if(count($links)>0)
+//                     {
+//                     foreach($links as $link)
+//                         {
+//                         $resources=librarylink_get_ranks($link['xg_type'], $link['xg_key']);
+//                         foreach($resources as $ref=>$rank) { if(!in_array($ref,$diff)) unset($resources[$ref]); }
+//                         lldebug($resources,'resource existing ranks');
+//                         $newranks=array();
+//                         $i=0;
+//                         foreach($resources as $ref=>$rank) 
+//                             {
+//                             $newranks[$diff[$i]]=$rank; 
+//                             $id=librarylink_modify_resource_link($diff[$i++], $link['xg_type'], $link['xg_key'], $rank);
+//                             // lldebug($id);
+//                             }
+//                         lldebug($newranks,'resource new ranks');
+//                         }
+//                     }
+//                 }
+//             }
 //         }
-//     }
-
-function HookLibrarylinkCollectionsPostchangecollection()
-    {
-    global $usercollection,$librarylink_collection_selected,$userref;
-    lldebug("Postchangecollection:".$usercollection);
-    if(is_librarylink_collection($usercollection))
-        {
-        $col_resource_ids=get_collection_resources($usercollection);
-        $links=librarylink_get_links_parameters(false);
-        if (checkperm("h"))
-            {
-            $reorder=getvalescaped("reorder",false);
-            if ($reorder)
-                {
-                $neworder=json_decode(getvalescaped("order",false));
-                // lldebug($col_resource_ids,'collection');
-                // lldebug($neworder,'collection new order');
-                $diff=array();
-                for($i=0;$i<count($neworder);$i++)
-                    {
-                    if($col_resource_ids[$i]!=$neworder[$i]) $diff[]=$neworder[$i];
-                    }
-                // lldebug($diff,'diff');
-
-                if(count($links)>0)
-                    {
-                    foreach($links as $link)
-                        {
-                        $resources=librarylink_get_ranks($link['xg_type'], $link['xg_key']);
-                        foreach($resources as $ref=>$rank) { if(!in_array($ref,$diff)) unset($resources[$ref]); }
-                        lldebug($resources,'resource existing ranks');
-                        $newranks=array();
-                        $i=0;
-                        foreach($resources as $ref=>$rank) 
-                            {
-                            $newranks[$diff[$i]]=$rank; 
-                            $id=librarylink_modify_resource_link($diff[$i++], $link['xg_type'], $link['xg_key'], $rank);
-                            // lldebug($id);
-                            }
-                        lldebug($newranks,'resource new ranks');
-                        }
-                    }
-                }
-            }
-        }
 
 
     // if(isset($_REQUEST['ll_save']))
@@ -249,6 +326,5 @@ function HookLibrarylinkCollectionsPostchangecollection()
     //             } //no links
     //         } //not the ll collection
     //     } //not saving ll collection
-    return true;
-    }
-
+    // return true;
+    // }

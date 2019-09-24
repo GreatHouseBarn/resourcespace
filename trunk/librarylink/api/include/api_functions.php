@@ -269,6 +269,140 @@ function librarylink_update_ranks($xg_type, $xg_key, $xg_rank)
         sql_query(sprintf("UPDATE librarylink_link set xgrank=xgrank+1 where xgtype='%s' and xgkey='%s' and xgrank>=%s",escape_check($xg_type),escape_check($xg_key),$xg_rank));
     }
 
+
+/* These functions manage the specific librarylink collections for each record (xgtype/xgkey)
+
+*/
+function librarylink_get_linked_collection($xg_type, $xg_key)
+    {
+    $xg_type=trim($xg_type);
+    $xg_key=trim($xg_key);
+    if($xg_type=='' or $xg_key=='') return false;
+    //first check if collection already exists
+    $sql=sprintf("select collection_ref,ref from librarylink_collection left join collection on collection_ref=ref where xgtype='%s' and xgkey='%s'",escape_check($xg_type),escape_check($xg_key));
+    $result=sql_query($sql);
+    if(isset($result[0]['collection_ref']) and isset($result[0]['ref'])) return $result[0]['collection_ref'];
+    return false;
+    }
+
+function librarylink_create_linked_collection($xg_type, $xg_key, $label='')
+    {
+    global $librarylink_api_user_id,$librarylink_collection_name_template;
+    $xg_type=trim($xg_type);
+    $xg_key=trim($xg_key);
+    if($xg_type=='' or $xg_key=='') return false;
+    $label=trim($label);
+    //just check if collection already exists
+    if($collection_id=librarylink_get_linked_collection($xg_type, $xg_key)) return $collection_id;
+
+    $name=sprintf($librarylink_collection_name_template,$xg_type,$label?$label:$xg_key);
+
+    $collection_id=create_collection($librarylink_api_user_id, $name, 0, 1, 0, false);
+    if($collection_id>0) 
+        { 
+        $sql=sprintf("insert into librarylink_collection(collection_ref,xgtype,xgkey,label) values (%s,'%s','%s','%s')",$collection_id,escape_check($xg_type),escape_check($xg_key),escape_check($label));
+        sql_query($sql);
+        lldebug("Created collection with id: $collection_id for session: ".$_COOKIE['user']);  
+        return $collection_id;
+        }
+    return false;
+    }
+
+function librarylink_add_user_to_linked_collection($collection_id)
+    {
+    global $userref;
+    if($collection_id>0) 
+        {
+        add_collection($userref,$collection_id); //add current user to the collection
+        lldebug("Added user: $userref to collection: $collection_id for session: ".$_COOKIE['user']);
+        }
+    }
+
+function librarylink_remove_user_from_linked_collection($collection_id)
+    {
+    global $userref;
+    if($collection_id>0) 
+        {
+        remove_collection($userref,$collection_id); //remove current user from the collection
+        lldebug("Removed user: $userref from collection: $collection_id for session: ".$_COOKIE['user']);
+        }
+    }
+
+function librarylink_remove_linked_collections_from_user($userref,$collection_ids)
+    {
+        if(!is_array($collection_ids) or count($collection_ids)==0) return;
+        $collections=implode(',',$collection_ids);        
+        $sql=sprintf("delete from user_collection where user=%s and collection in (%s)",$userref,$collections);
+        sql_query($sql);
+        lldebug("Deleted collections: $collections for user: $userref with session: ".$_COOKIE['user']);
+    }
+
+function librarylink_is_linked_collection($usercollection)
+    {
+    global $userref;
+    $sql=sprintf("select collection_ref as value from librarylink_collection left join user_collection on collection_ref=collection where user=%s",$userref);
+    $collection_ids=sql_array($sql);
+    if(in_array($usercollection,$collection_ids)) return true;
+    return false;
+    }
+
+function librarylink_get_linked_collections()
+    {
+        $sql=sprintf("select collection_ref as value from librarylink_collection left join collection on collection_ref=ref where ref is not null");
+        $collection_ids=sql_array($sql);
+        return $collection_ids;
+    }
+
+function librarylink_get_link_parameters($set_cookies=true)
+    {
+        global $links_changed;
+        $links=array();
+        $links_changed=false;
+        if(isset($_REQUEST['ll_type'])) $ll_type=trim($_REQUEST['ll_type']); else $ll_type='';
+        if(isset($_REQUEST['ll_keys'])) $ll_keys=trim($_REQUEST['ll_keys']); else $ll_keys='';
+        if($ll_type!='' and $ll_keys!='') 
+            {
+            if(isset($_COOKIE['ll_type']) and $ll_type!=$_COOKIE['ll_type']) $links_changed=true;
+            if(isset($_COOKIE['ll_keys']) and $ll_keys!=$_COOKIE['ll_keys']) $links_changed=true;
+            if($set_cookies or $links_changed)
+                {
+                rs_setcookie('ll_type',$ll_type,0,"","",false,false);
+                rs_setcookie('ll_keys',$ll_keys,0,"","",false,false);
+                }
+            } else {
+            if(isset($_COOKIE['ll_type'])) $ll_type=$_COOKIE['ll_type']; else $ll_type='';
+            if(isset($_COOKIE['ll_keys'])) $ll_keys=$_COOKIE['ll_keys']; else $ll_keys='';  
+            if($ll_type!='' and $ll_keys!='') 
+                {
+                if($set_cookies or $links_changed)
+                    {
+                    rs_setcookie('ll_type',$ll_type,0,"","",false,false);
+                    rs_setcookie('ll_keys',$ll_keys,0,"","",false,false);
+                    }
+                }
+            }
+
+        if($ll_type=='' or $ll_keys=='') return $links;
+
+        $keys=explode(',',$ll_keys);
+        sort($keys);
+        for($i=0;$i<count($keys);$i++)
+            {
+            $tmp=explode('|',$keys[$i]);
+            $links[$i]=array();
+            $links[$i]['xg_type']=$ll_type;
+            $links[$i]['xg_key']=trim($tmp[0]);
+            $links[$i]['label']=isset($tmp[1])?trim($tmp[1]):'';
+            }
+        lldebug("Links:");
+        lldebug($links);
+        return $links;
+    }
+
+// end collection functions
+
+
+
 function librarylink_create_librarylink_collection()
     {
     global $userref, $collection_allow_creation, $librarylink_collection_name;
@@ -356,6 +490,8 @@ function librarylink_get_links_parameters($set_cookies=true)
             }
         return $links;
     }
+
+
 
 function librarylink_iframe_header()
     {

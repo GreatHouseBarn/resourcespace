@@ -70,6 +70,7 @@ $enable_thumbnail_creation_on_upload = false;
 
 $collections_footer = true;
 $collections_delete_empty=true;
+$sharing_userlists=true; // enable users to save/select predefined lists of users/groups when sharing collections and resources.
 
 # All user permissions for the dash are revoked and the dash admin can manage a single dash for all users. 
 # Only those with admin privileges can modify the dash and this must be done from the Team Centre > Manage all user dash tiles (One dash for all)
@@ -231,3 +232,7 @@ $file_upload_block_duplicates=true;
 # checksums will not be generated in realtime; a background cron job must be used
 # recommended if files are large, since the checksums can take time
 $file_checksums_offline = true;
+
+
+
+$use_pdfjs_viewer = true;
