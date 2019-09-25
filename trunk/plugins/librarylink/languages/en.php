@@ -4,9 +4,16 @@
 # -------
 #
 #
+
+$lang['librarylink_collection_name']="%s - %s (LibraryLink)";
+$lang['librarylink_collection_shortdesc']="LibraryLink Type: '%s',\nRecord Name: '%s',\nKey: '%s'";
+$lang['librarylink_collection_description']="This is a LibraryLink collection which is holds resources that are linked to: Record Type: '%s', Record Name: '%s', Record Key: '%s'";
+$lang["librarylink_currentcollection"]="Current LibraryLink collection:";
+
+# these are copied from core and have had ResourceSpace replaced by LibraryLink
+
 $lang["home__llwelcometitle"]="Welcome to LibraryLink";
 $lang["home__llwelcometext"]="LibraryLink for %s";
-
 
 $lang["softwarebuild"]="? Build"; # E.g. "LibraryLink Build"
 $lang["setup-alreadyconfigured"]="Your LibraryLink installation is already configured.  To reconfigure, you may delete <pre>include/config.php</pre> and point your browser to this page again.";
@@ -25,7 +32,6 @@ $lang["home__restrictedtitle"]="Welcome to LibraryLink [ver]";
 $lang["home__welcometitle"]="Welcome to LibraryLink [ver]";
 $lang["login__welcomelogin"]="Welcome to LibraryLink, please log in...";
 $lang['linkedheaderimgsrc']="Location of the logo image in the header (Defaults to LibraryLink):";
-
 
 # these are copied from various plugins and have had ResourceSpace replaced by LibraryLink
 

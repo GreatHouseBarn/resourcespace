@@ -9,33 +9,37 @@ function HookLibrarylinkCollectionsThumbsmenu()
 
 function HookLibrarylinkCollectionsBeforecollectiontoolscolumn()
     {
-    global $usercollection,$librarylink_collection_selected,$librarylink_auto_refresh_collection_bottom;
+    global $lang,$usercollection,$librarylink_collection_selected,$librarylink_auto_refresh_collection_bottom;
     lldebug("-----------------------------------------------------------");
     lldebug("Beforecollectiontoolscolumn");    
     $librarylink_collection_selected=false;
     if(librarylink_is_linked_collection($usercollection))
         {
         $librarylink_collection_selected=true;
-        $links=librarylink_get_link_parameters(false);
-        if(count($links)>0)
+        if($collection=librarylink_get_linked_collection_by_id($usercollection))
             {
-            // if($librarylink_auto_refresh_collection_bottom) print "
-            // <script>setTimeout(function(){UpdateCollectionDisplay('');},20000);</script>\n";
-            if(count($links)==1)
-                {
-                printf("1 Record of type: %s",$links[0]['xg_type']);
-                printf("<br />%s%s<br />\n",$links[0]['xg_key'],' ('.$links[0]['label'].')');
-                } else {
-                printf("%s Records of type: %s",count($links),$links[0]['xg_type']);
-                print "<select name=\"ll_link\" readonly>\n";
-                foreach($links as $link)
-                    {
-                    $value=sprintf("%s%s\n",$link['xg_key'],' ('.$link['label'].')');
-                    printf("<option value=\"%s\" readonly>%s</option>\n",$value,$value);
-                    }
-                print "</select>\n";
-                }            
-            } else print "Not currently linked to any record.";
+            printf('<div class="ll_col_desc">%s</div>',nl2br(sprintf($lang['librarylink_collection_shortdesc'],$collection['xgtype'],$collection['label'],$collection['xgkey'])));
+            } 
+        // $links=librarylink_get_link_parameters(false);
+        // if(count($links)>0)
+        //     {
+        //     if($librarylink_auto_refresh_collection_bottom>0) printf("
+        //     <script>jQuery( document ).ready(function(){setTimeout(function(){UpdateCollectionDisplay('');},%s);});</script>\n",$librarylink_auto_refresh_collection_bottom*1000);
+        //     if(count($links)==1)
+        //         {
+        //         printf("1 Record of type: %s",$links[0]['xg_type']);
+        //         printf("<br />%s%s<br />\n",$links[0]['xg_key'],' ('.$links[0]['label'].')');
+        //         } else {
+        //         printf("%s Records of type: %s",count($links),$links[0]['xg_type']);
+        //         print "<select name=\"ll_link\" readonly>\n";
+        //         foreach($links as $link)
+        //             {
+        //             $value=sprintf("%s%s\n",$link['xg_key'],' ('.$link['label'].')');
+        //             printf("<option value=\"%s\" readonly>%s</option>\n",$value,$value);
+        //             }
+        //         print "</select>\n";
+        //         }            
+        //     } else print "Not currently linked to any record.";
         return false;
         }
     return true;

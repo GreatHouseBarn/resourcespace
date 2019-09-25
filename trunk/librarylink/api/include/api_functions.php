@@ -279,33 +279,65 @@ function librarylink_get_linked_collection($xg_type, $xg_key)
     $xg_key=trim($xg_key);
     if($xg_type=='' or $xg_key=='') return false;
     //first check if collection already exists
-    $sql=sprintf("select collection_ref,ref from librarylink_collection left join collection on collection_ref=ref where xgtype='%s' and xgkey='%s'",escape_check($xg_type),escape_check($xg_key));
+    $sql=sprintf("select collection_ref,ref,name,description from librarylink_collection left join collection on collection_ref=ref where xgtype='%s' and xgkey='%s'",escape_check($xg_type),escape_check($xg_key));
     $result=sql_query($sql);
-    if(isset($result[0]['collection_ref']) and isset($result[0]['ref'])) return $result[0]['collection_ref'];
+    if(isset($result[0]['collection_ref']) and $result[0]['ref']>0) return $result[0];
+    return false;
+    }
+
+function librarylink_get_linked_collection_by_id($ref)
+    {
+    if(!preg_match('/^[0-9]+$/',$ref)) return false;
+    $sql=sprintf("select collection_ref,xgtype,xgkey,label,ref,name,description from librarylink_collection left join collection on collection_ref=ref where collection_ref=%s",$ref);
+    $result=sql_query($sql);
+    if(isset($result[0]['collection_ref']) and $result[0]['ref']>0) return $result[0];
     return false;
     }
 
 function librarylink_create_linked_collection($xg_type, $xg_key, $label='')
     {
-    global $librarylink_api_user_id,$librarylink_collection_name_template;
+    global $lang,$librarylink_api_user_id,$librarylink_collection_name_template;
     $xg_type=trim($xg_type);
     $xg_key=trim($xg_key);
     if($xg_type=='' or $xg_key=='') return false;
     $label=trim($label);
-    //just check if collection already exists
-    if($collection_id=librarylink_get_linked_collection($xg_type, $xg_key)) return $collection_id;
+    $description=sprintf($lang['librarylink_collection_description'],$xg_type,$label,$xg_key);
+    $name=sprintf($lang['librarylink_collection_name'],$xg_type,$label?$label:$xg_key);
+    
+    //check if collection exists and looks ok
+    $create_collection=$update_collection=false;
+    $collection=librarylink_get_linked_collection($xg_type, $xg_key);    
+    if(false===$collection) $create_collection=true;
+    if(isset($collection['ref']) and ! ($collection['ref']>0)) $create_collection=true;
+    if(isset($collection['description']) and $collection['description']!=$description) $update_collection=true;
+    if(isset($collection['name']) and $collection['name']!=$name) $update_collection=true;
 
-    $name=sprintf($librarylink_collection_name_template,$xg_type,$label?$label:$xg_key);
-
-    $collection_id=create_collection($librarylink_api_user_id, $name, 0, 1, 0, false);
-    if($collection_id>0) 
+    if($create_collection)
         { 
-        $sql=sprintf("insert into librarylink_collection(collection_ref,xgtype,xgkey,label) values (%s,'%s','%s','%s')",$collection_id,escape_check($xg_type),escape_check($xg_key),escape_check($label));
-        sql_query($sql);
-        lldebug("Created collection with id: $collection_id for session: ".$_COOKIE['user']);  
-        return $collection_id;
+        $collection['ref']=create_collection($librarylink_api_user_id, $name, 1, 1, 0, false);
+        if($collection['ref']>0) 
+            {
+            $sql=sprintf("delete from librarylink_collection where xgtype='%s' and xgkey='%s'",escape_check($xg_type),escape_check($xg_key));
+            sql_query($sql);
+            $sql=sprintf("insert into librarylink_collection(collection_ref,xgtype,xgkey,label) values (%s,'%s','%s','%s')",$collection['ref'],escape_check($xg_type),escape_check($xg_key),escape_check($label));
+            sql_query($sql);        
+            lldebug(sprintf("Created collection with id: %s for session: %s and request: %s",$collection['ref'],$_COOKIE['user'],$_SERVER['REQUEST_URI']));  
+            } else {
+            $message=sprintf($lang['librarylink_collection_failed'],$name);
+            lldebug($message);
+            }
         }
-    return false;
+
+    if($update_collection)
+        {
+        $collection['description']=$description;
+        $collection['name']=$name;
+        $sql=sprintf("update collection set name='%s',description='%s' where ref=%s",escape_check($collection['name']),escape_check($collection['description']),$collection['ref']);
+        sql_query($sql);        
+        lldebug(sprintf("Updated collection with id: %s for session: %s and request: %s",$collection['ref'],$_COOKIE['user'],$_SERVER['REQUEST_URI']));  
+        }
+
+    return $collection;
     }
 
 function librarylink_add_user_to_linked_collection($collection_id)
@@ -314,7 +346,7 @@ function librarylink_add_user_to_linked_collection($collection_id)
     if($collection_id>0) 
         {
         add_collection($userref,$collection_id); //add current user to the collection
-        lldebug("Added user: $userref to collection: $collection_id for session: ".$_COOKIE['user']);
+        lldebug(sprintf("Added user: %s to collection: %s for session: %s and request: %s",$userref,$collection_id,$_COOKIE['user'],$_SERVER['REQUEST_URI']));
         }
     }
 
@@ -324,7 +356,7 @@ function librarylink_remove_user_from_linked_collection($collection_id)
     if($collection_id>0) 
         {
         remove_collection($userref,$collection_id); //remove current user from the collection
-        lldebug("Removed user: $userref from collection: $collection_id for session: ".$_COOKIE['user']);
+        lldebug(sprintf("Removed user: %s from collection: %s for session: %s and request: %s",$userref,$collection_id,$_COOKIE['user'],$_SERVER['REQUEST_URI']));
         }
     }
 
@@ -334,7 +366,7 @@ function librarylink_remove_linked_collections_from_user($userref,$collection_id
         $collections=implode(',',$collection_ids);        
         $sql=sprintf("delete from user_collection where user=%s and collection in (%s)",$userref,$collections);
         sql_query($sql);
-        lldebug("Deleted collections: $collections for user: $userref with session: ".$_COOKIE['user']);
+        lldebug(sprintf("Deleted collections: %s for user: %s with session: %s and request: %s",$collections,$userref,$_COOKIE['user'],$_SERVER['REQUEST_URI']));
     }
 
 function librarylink_is_linked_collection($usercollection)
@@ -346,9 +378,9 @@ function librarylink_is_linked_collection($usercollection)
     return false;
     }
 
-function librarylink_get_linked_collections()
+function librarylink_get_linked_collections($userref)
     {
-        $sql=sprintf("select collection_ref as value from librarylink_collection left join collection on collection_ref=ref where ref is not null");
+        $sql=sprintf("select collection_ref as value from librarylink_collection left join user_collection on collection_ref=collection and user=%s",$userref);
         $collection_ids=sql_array($sql);
         return $collection_ids;
     }

@@ -30,55 +30,64 @@ function HookLibrarylinkAllAfterregisterplugin($params='')
     {
     if($params=='librarylink')
         {
-        lldebug("-----------------------------------------------------------");
-        lldebug("Afterregisterplugin");
-        global $userref, $collection_allow_creation, $links_changed, $baseurl;
-        if(!checkperm("LL")) { return true; } //no LibraryLink permissions
-        if (checkperm("b") || !$collection_allow_creation) { return true; }; //no bottom collection bar or create collection permissions
-        db_begin_transaction();
-        $collection_ids=librarylink_get_linked_collections();
-        librarylink_remove_linked_collections_from_user($userref,$collection_ids); //remove any collection we can see
-        $links=librarylink_get_link_parameters();
-        if(count($links)>0)
+        $required_pages=array(  //not all pages need our plugin's intervention - only these
+            '/pages/ajax/browsebar_load.php',
+            '/pages/collection_manage.php', //not sure about this one
+            '/pages/collections.php',
+            '/pages/search.php',
+        );
+        if(in_array($_SERVER['SCRIPT_NAME'],$required_pages))
             {
-            foreach($links as $link) //make sure each specified collection exists and is visible to the user
+            lldebug("-----------------------------------------------------------");
+            lldebug("Afterregisterplugin");
+            global $userref, $collection_allow_creation, $links_changed, $baseurl;
+            if(!checkperm("LL")) { return true; } //no LibraryLink permissions
+            if (checkperm("b") || !$collection_allow_creation) { return true; }; //no bottom collection bar or create collection permissions
+            db_begin_transaction();
+            $collection_ids=librarylink_get_linked_collections($userref);   //get this users current linked collections
+            librarylink_remove_linked_collections_from_user($userref,$collection_ids); //remove any collections we can see
+            $links=librarylink_get_link_parameters();   //get our requested (or cookied) list of records
+            if(count($links)>0)
                 {
-                if(!$collection_id=librarylink_get_linked_collection($link['xg_type'], $link['xg_key']))
+                foreach($links as $link) //make sure each specified record collection exists and is visible to the user
                     {
-                    $collection_id=librarylink_create_linked_collection($link['xg_type'], $link['xg_key'], $link['label']);
+                    if($collection=librarylink_create_linked_collection($link['xg_type'], $link['xg_key'], $link['label']))
+                        {
+                        librarylink_add_user_to_linked_collection($collection['ref']);
+                        }
                     }
-                if($collection_id) { librarylink_add_user_to_linked_collection($collection_id); }
                 }
-            }
-            db_end_transaction();
+                db_end_transaction();
 
-        if($links_changed)
-            {
-            if(!isset($_GET['search']) or (isset($_GET['search']) and $_GET['search']=='')) //and an empty search phrase?
+            if($links_changed)  //show the last record in the search if our record list changed
                 {
-                $redirect=sprintf("%/search.php?search=!collection%s",$baseurl,$collection_id);
-                header('Location: '.$redirect); //redirect to showing the librarylink collection
-                exit;
+                if(!isset($_GET['search']) or (isset($_GET['search']) and $_GET['search']=='')) //and an empty search phrase?
+                    {
+                    $redirect=sprintf("%/search.php?search=!collection%s",$baseurl,$collection['ref']);
+                    header('Location: '.$redirect); //redirect to showing the librarylink collection
+                    set_user_collection($userref,$collection['ref']);
+                    exit;
+                    }
                 }
-            }
 
+            }
         }
     }
 
 function HookLibrarylinkAllAdd_bottom_in_page_nav_left()
     {
-    global $librarylink_links,$librarylink_auto_refresh_collection_top;
+    global $librarylink_auto_refresh_collection_top;
     if(isset($_GET['search']))
         {
         $search=$_GET['search'];
         if(preg_match('/^\!collection([0-9]+)/',$search,$m))
             {
             $search_collection=$m[1];
-            if(is_librarylink_collection($search_collection))
+            if(librarylink_is_linked_collection($search_collection))
                 {
-                print nl2br(sql_value(sprintf("select description as value from collection where ref=%s",$search_collection),''));
-                if($librarylink_auto_refresh_collection_top) print "
-                <script>setTimeout(function(){UpdateResultOrder();},20000);</script>\n";
+                print sql_value(sprintf("select description as value from collection where ref=%s",$search_collection),'');
+                if($librarylink_auto_refresh_collection_top>0) printf("
+                <script>jQuery( document ).ready(function(){setTimeout(function(){UpdateResultOrder();},%s);});</script>\n",$librarylink_auto_refresh_collection_top*1000);
                 }
             }
         }
