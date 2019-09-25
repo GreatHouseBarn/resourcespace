@@ -1,0 +1,5 @@
+librarylink_collection,0,PRIMARY,1,collection_ref,A,2,,,,BTREE,,
+librarylink_collection,0,PRIMARY,2,xgtype,A,2,,,,BTREE,,
+librarylink_collection,0,PRIMARY,3,xgkey,A,2,,,,BTREE,,
+librarylink_collection,1,xgtype,1,xgtype,A,2,,,,BTREE,,
+librarylink_collection,1,xgkey,1,xgkey,A,2,,,,BTREE,,
