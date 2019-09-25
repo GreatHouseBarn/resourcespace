@@ -236,3 +236,15 @@ $file_checksums_offline = true;
 
 
 $use_pdfjs_viewer = true;
+
+
+
+# Length of a user session. This is used for statistics (user sessions per day) and also for auto-log out if $session_autologout is set.
+$session_length = 86400;
+
+# Automatically log a user out at the end of a session (a period of idleness equal to $session_length above).
+$session_autologout = true;
+
+# Randomised session hash?
+# Setting to 'true' means each new session is completely unique each login. This may be more secure as the hash is less easy to guess but means that only one user can use a given user account at any one time.
+$randomised_session_hash=true;
