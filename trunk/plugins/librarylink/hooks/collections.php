@@ -9,9 +9,11 @@ function HookLibrarylinkCollectionsThumbsmenu()
 
 function HookLibrarylinkCollectionsBeforecollectiontoolscolumn()
     {
-    global $lang,$usercollection,$librarylink_collection_selected,$librarylink_auto_refresh_collection_bottom;
+    global $collection_allow_creation,$lang,$usercollection,$librarylink_collection_selected,$librarylink_auto_refresh_collection_bottom;
     lldebug("-----------------------------------------------------------");
-    lldebug("Beforecollectiontoolscolumn");    
+    lldebug("Beforecollectiontoolscolumn");
+    if(!checkperm("LL")) { return true; } //no LibraryLink permissions
+    if (checkperm("b") || !$collection_allow_creation) { return true; }; //no bottom collection bar or create collection permissions
     $librarylink_collection_selected=false;
     if(librarylink_is_linked_collection($usercollection))
         {
@@ -19,7 +21,9 @@ function HookLibrarylinkCollectionsBeforecollectiontoolscolumn()
         if($collection=librarylink_get_linked_collection_by_id($usercollection))
             {
             printf('<div class="ll_col_desc">%s</div>',nl2br(sprintf($lang['librarylink_collection_shortdesc'],$collection['xgtype'],$collection['label'],$collection['xgkey'])));
-            } 
+            }
+        if($librarylink_auto_refresh_collection_bottom) printf("
+        <script>setTimeout(function(){UpdateCollectionDisplay('');},%s);</script>\n",$librarylink_auto_refresh_collection_bottom*1000); 
         return false;
         }
     return true;
@@ -35,7 +39,9 @@ function HookLibrarylinkCollectionsPrevent_running_render_actions()
 
 function HookLibrarylinkCollectionsPostaddtocollection()
     {
-    global $usercollection,$add;
+    global $collection_allow_creation,$usercollection,$add;
+    if(!checkperm("LL")) { return; } //no LibraryLink permissions
+    if (checkperm("b") || !$collection_allow_creation) { return; }; //no bottom collection bar or create collection permissions
     lldebug("-----------------------------------------------------------");
     lldebug(sprintf("Postaddtocollection: %s, resource: %s",$usercollection,$add));
     if(librarylink_is_linked_collection($usercollection))
@@ -46,7 +52,9 @@ function HookLibrarylinkCollectionsPostaddtocollection()
 
 function HookLibrarylinkCollectionsPostremovefromcollection()
     {
-    global $usercollection,$remove;
+    global $collection_allow_creation,$usercollection,$remove;
+    if(!checkperm("LL")) { return; } //no LibraryLink permissions
+    if (checkperm("b") || !$collection_allow_creation) { return; }; //no bottom collection bar or create collection permissions
     lldebug("-----------------------------------------------------------");
     lldebug(sprintf("Postremovefromcollection: %s, resource: %s",$usercollection,$remove));
     if(librarylink_is_linked_collection($usercollection))
