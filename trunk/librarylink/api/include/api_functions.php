@@ -270,6 +270,57 @@ function librarylink_update_ranks($xg_type, $xg_key, $xg_rank)
     }
 
 
+
+function librarylink_add_keyword_to_resource($ref,$usercollection)
+    {
+    global $librarylink_record_keywords_field;
+    if($collection=librarylink_get_linked_collection_by_id($usercollection))
+        {
+        $keyword=sprintf("%s_%s",$collection['xgtype'],$collection['xgkey']);
+        add_keyword_mappings($ref,$keyword,$librarylink_record_keywords_field);
+        lldebug(sprintf("Added keyword: %s to resource: %s",$keyword,$ref));
+        $sql=sprintf("select value from resource_data where resource=%s and resource_type_field=%s",$ref,$librarylink_record_keywords_field);
+        $existing = sql_value($sql,false);
+        if(false!==$existing)
+            {
+            $values=explode(' ',trim($existing));
+            $values[]=$keyword;
+            $values=array_unique($values);
+            $new=implode(' ',$values);
+            $sql=sprintf("update resource_data set value='%s' where resource=%s and resource_type_field=%s",escape_check($new),$ref,$librarylink_record_keywords_field);
+            sql_query($sql);
+            lldebug(sprintf("Updated field: %s in resource: %s to: %s",$librarylink_record_keywords_field,$ref,$new));
+            } else {
+            $sql=sprintf("insert into resource_data(resource,resource_type_field,value) values (%s,%s,'%s')",$ref,$librarylink_record_keywords_field,escape_check($keyword));
+            sql_query($sql);
+            lldebug(sprintf("Inserted field: %s in resource: %s to: %s",$librarylink_record_keywords_field,$ref,$keyword));
+            }
+        }               
+    }
+
+function librarylink_remove_keyword_from_resource($ref,$usercollection)
+    {
+    global $librarylink_record_keywords_field;
+    if($collection=librarylink_get_linked_collection_by_id($usercollection))
+        {
+        $keyword=sprintf("%s_%s",$collection['xgtype'],$collection['xgkey']);
+        remove_keyword_mappings($ref,$keyword,$librarylink_record_keywords_field);
+        lldebug(sprintf("Removed keyword: %s from resource: %s",$keyword,$ref));
+        $sql=sprintf("select value from resource_data where resource=%s and resource_type_field=%s",$ref,$librarylink_record_keywords_field);
+        $existing = sql_value($sql,false);
+        if(false!==$existing)
+            {
+            $values=explode(' ',trim($existing));
+            $values=array_diff($values,array($keyword));
+            $values=array_unique($values);
+            $new=implode(' ',$values);
+            $sql=sprintf("update resource_data set value='%s' where resource=%s and resource_type_field=%s",escape_check($new),$ref,$librarylink_record_keywords_field);
+            sql_query($sql);
+            lldebug(sprintf("Updated field: %s in resource: %s to: %s",$librarylink_record_keywords_field,$ref,$new));
+            }
+        }              
+    }
+
 /* These functions manage the specific librarylink collections for each record (xgtype/xgkey)
 
 */

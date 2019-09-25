@@ -20,30 +20,41 @@ function HookLibrarylinkCollectionsBeforecollectiontoolscolumn()
             {
             printf('<div class="ll_col_desc">%s</div>',nl2br(sprintf($lang['librarylink_collection_shortdesc'],$collection['xgtype'],$collection['label'],$collection['xgkey'])));
             } 
-        // $links=librarylink_get_link_parameters(false);
-        // if(count($links)>0)
-        //     {
-        //     if($librarylink_auto_refresh_collection_bottom>0) printf("
-        //     <script>jQuery( document ).ready(function(){setTimeout(function(){UpdateCollectionDisplay('');},%s);});</script>\n",$librarylink_auto_refresh_collection_bottom*1000);
-        //     if(count($links)==1)
-        //         {
-        //         printf("1 Record of type: %s",$links[0]['xg_type']);
-        //         printf("<br />%s%s<br />\n",$links[0]['xg_key'],' ('.$links[0]['label'].')');
-        //         } else {
-        //         printf("%s Records of type: %s",count($links),$links[0]['xg_type']);
-        //         print "<select name=\"ll_link\" readonly>\n";
-        //         foreach($links as $link)
-        //             {
-        //             $value=sprintf("%s%s\n",$link['xg_key'],' ('.$link['label'].')');
-        //             printf("<option value=\"%s\" readonly>%s</option>\n",$value,$value);
-        //             }
-        //         print "</select>\n";
-        //         }            
-        //     } else print "Not currently linked to any record.";
         return false;
         }
     return true;
     }
+
+
+function HookLibrarylinkCollectionsPrevent_running_render_actions()
+    {
+    global $librarylink_collection_selected;
+    //lldebug("Prevent_running_render_actions");
+    return $librarylink_collection_selected; //disable actions if in  LibraryLink collection
+    }
+
+function HookLibrarylinkCollectionsPostaddtocollection()
+    {
+    global $usercollection,$add;
+    lldebug("-----------------------------------------------------------");
+    lldebug(sprintf("Postaddtocollection: %s, resource: %s",$usercollection,$add));
+    if(librarylink_is_linked_collection($usercollection))
+        {
+        librarylink_add_keyword_to_resource($add,$usercollection); //use the xgtype_xglink from the collection           
+        }
+    }
+
+function HookLibrarylinkCollectionsPostremovefromcollection()
+    {
+    global $usercollection,$remove;
+    lldebug("-----------------------------------------------------------");
+    lldebug(sprintf("Postremovefromcollection: %s, resource: %s",$usercollection,$remove));
+    if(librarylink_is_linked_collection($usercollection))
+        {
+        librarylink_remove_keyword_from_resource($remove,$usercollection); //use the xgtype_xglink from the collection 
+        }
+    }
+
 
 // function HookLibrarylinkCollectionsAftercollectionsrenderactions()
 //     {
@@ -113,12 +124,6 @@ function HookLibrarylinkCollectionsBeforecollectiontoolscolumn()
 //     return true;
 //     }
 
-function HookLibrarylinkCollectionsPrevent_running_render_actions()
-    {
-    global $librarylink_collection_selected;
-    //lldebug("Prevent_running_render_actions");
-    return $librarylink_collection_selected; //disable actions if in  LibraryLink collection
-    }
 
 // function HookLibrarylinkCollectionsPostaddtocollection()
 //     {

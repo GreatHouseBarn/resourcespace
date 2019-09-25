@@ -70,7 +70,7 @@ function HookLibrarylinkAllAfterregisterplugin($params='')
                     }
                 }
 
-            }
+            } else lldebug("Skipped doing anything for: ".$_SERVER['SCRIPT_NAME']);
         }
     }
 
