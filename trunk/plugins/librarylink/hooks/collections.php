@@ -46,6 +46,7 @@ function HookLibrarylinkCollectionsPostaddtocollection()
     lldebug(sprintf("Postaddtocollection: %s, resource: %s",$usercollection,$add));
     if(librarylink_is_linked_collection($usercollection))
         {
+        librarylink_set_ranks_by_collection_id($usercollection); //make sure ll collections have proper ranking with no NULLs
         librarylink_add_keyword_to_resource($add,$usercollection); //use the xgtype_xglink from the collection           
         }
     }
@@ -59,7 +60,8 @@ function HookLibrarylinkCollectionsPostremovefromcollection()
     lldebug(sprintf("Postremovefromcollection: %s, resource: %s",$usercollection,$remove));
     if(librarylink_is_linked_collection($usercollection))
         {
-        librarylink_remove_keyword_from_resource($remove,$usercollection); //use the xgtype_xglink from the collection 
+        librarylink_remove_keyword_from_resource($remove,$usercollection); //use the xgtype_xglink from the collection
+        librarylink_set_ranks_by_collection_id($usercollection); //make sure ll collections have proper ranking with no NULLs
         }
     }
 

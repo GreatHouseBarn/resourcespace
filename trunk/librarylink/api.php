@@ -34,11 +34,12 @@ $api_calls=array(
     array("api"=>"---LibraryLink API Functions:---"),
     // Our LibraryLink API extensions are defined here:
     array("api"=>"librarylink_test","ref"=>null),
-    array("api"=>"librarylink_add_resource_link","ref"=>null,"xg_type"=>null,"xg_key"=>null,"xg_rank"=>1,"add_keywords"=>'"true"'),
+    array("api"=>"librarylink_add_resource_link","ref"=>null,"xg_type"=>null,"xg_key"=>null,"xg_label"=>'"" (empty)',"xg_rank"=>1,"add_keywords"=>'"true"'),
     array("api"=>"librarylink_delete_resource_link","ref"=>null,"xg_type"=>null,"xg_key"=>null,"delete_keywords"=>'"true"'),
-    array("api"=>"librarylink_modify_resource_link","ref"=>null,"xg_type"=>null,"xg_key"=>null,"xg_rank"=>null),
-    array("api"=>"librarylink_delete_links","xg_type"=>null,"xg_key"=>null,"delete_keywords"=>'"true"'),
-    array("api"=>"librarylink_delete_links_by_ref","ref"=>null, "delete_keywords"=>'"true"'),
+    array("api"=>"librarylink_modify_resource_link_rank","ref"=>null,"xg_type"=>null,"xg_key"=>null,"xg_rank"=>null),
+    array("api"=>"librarylink_get_linked_resources","xg_type"=>null,"xg_key"=>null),
+    array("api"=>"librarylink_delete_links","xg_type"=>null,"xg_key"=>null,"delete_keywords"=>'"true"',"delete_collection"=>'"false"'),
+    array("api"=>"librarylink_delete_links_by_ref","ref"=>null, "delete_keywords"=>'"true"',"check_exists"=>'"true"'),
     array("api"=>"librarylink_get_all_links"),
     array("api"=>"librarylink_upload_resource","resource_type"=>"1 (Photo)","archive"=>"0 (Active)","no_exif"=>'"false"',"revert"=>'"false"',"autorotate"=>'"false"',"metadata"=>'"" (empty)',"userfile"=>null),
     array("api"=>"librarylink_do_search","xg_type"=>'"" (empty)',"xg_key"=>'"" (empty)',"fetchrows"=>-1,"sort"=>'"asc"'),
@@ -74,7 +75,7 @@ if(isset($_POST['Execute']) or isset($_GET['Execute'])) {
     # Sign the query using the private key
     $sign=hash("sha256",$private_key . $query);
     $query.='&sign='.$sign;
-    $query=$_SERVER['HTTP_ORIGIN'].'/librarylink/api/?'.$query;
+    $query=($_SERVER['HTTPS']=='on'?'https://':'http://').$_SERVER['HTTP_HOST'].'/librarylink/api/?'.$query;
 
     if(!preg_match('/iframe$/',$name)) {
         if(!isset($_FILES['userfile'])) {

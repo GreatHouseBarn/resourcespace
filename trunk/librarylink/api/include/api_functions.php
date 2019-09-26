@@ -96,181 +96,416 @@ function librarylink_execute_api_call($query,$pretty=true)
     }
 
 
-function librarylink_add_resource_link($ref, $xg_type, $xg_key, $xg_rank, $add_keywords)
+// function librarylink_add_resource_link($ref, $xg_type, $xg_key, $xg_rank, $add_keywords)
+//     {
+//         if(!preg_match('/^[0-9]+$/',$ref)) { return (object)array('error'=>'resource ref must be a number'); }
+//         if($xg_type=="" or $xg_key=="") { return (object)array('error'=>'xg_type and xgkey cannot be empty'); }
+//         if(!preg_match('/^[0-9]+$/',$xg_rank)) { return (object)array('error'=>'xg_rank must be a number'); }
+        
+//         $resource=get_resource_data($ref, true);
+//         if(!$resource) { return (object)array('error'=>'a resource with that ref could not be found'); }
+
+//         //lldebug($resource);
+//         global $userref;
+//         $userinfo=get_user($userref);
+//         $user=$userinfo["username"] . "-" . $userinfo["fullname"];
+
+//         $id = (int)sql_value(sprintf("select id as value from librarylink_link where ref=%s and xgtype='%s' and xgkey='%s'",$ref,escape_check($xg_type),escape_check($xg_key)),0);
+//         if($id===0)
+//             {
+//             db_begin_transaction();
+//             librarylink_update_ranks($xg_type, $xg_key, $xg_rank); //shift ranks up by one where we want to place a rank
+//             sql_query(sprintf("INSERT into librarylink_log (ref,xgtype,xgkey,xgrank,operation,user,`time`) values (%s,'%s','%s',%s,'%s','%s','%s')",$ref,escape_check($xg_type),escape_check($xg_key),$xg_rank,"Move Links Ranks >= $xg_rank up one",escape_check($user),date('Y-m-d H:i:s')));
+//             sql_query(sprintf("INSERT into librarylink_link (ref,xgtype,xgkey,xgrank,label) values (%s,'%s','%s',%s,'%s')",$ref,escape_check($xg_type),escape_check($xg_key),$xg_rank,''));
+//             $id=sql_insert_id();
+//             sql_query(sprintf("INSERT into librarylink_log (ref,xgtype,xgkey,xgrank,operation,user,`time`) values (%s,'%s','%s',%s,'%s','%s','%s')",$ref,escape_check($xg_type),escape_check($xg_key),$xg_rank,'Add Link',escape_check($user),date('Y-m-d H:i:s')));
+//             db_end_transaction();
+//             } else {
+//                 return (object)array('error'=>'a record link with that xgtype and xgkey already exists for this resource');
+//             }
+
+//         return $id; //link id
+//     }
+
+//add a resource by id to a librarylink_collection with xg_type and xg_key
+function librarylink_add_resource_link($ref, $xg_type, $xg_key, $label='', $xg_rank=1, $add_keywords=true)
     {
-        if(!preg_match('/^[0-9]+$/',$ref)) { return (object)array('error'=>'resource ref must be a number'); }
-        if($xg_type=="" or $xg_key=="") { return (object)array('error'=>'xg_type and xgkey cannot be empty'); }
-        if(!preg_match('/^[0-9]+$/',$xg_rank)) { return (object)array('error'=>'xg_rank must be a number'); }
-        
-        $resource=get_resource_data($ref, true);
-        if(!$resource) { return (object)array('error'=>'a resource with that ref could not be found'); }
+    if(!preg_match('/^[0-9]+$/',$ref)) { return (object)array('error'=>'resource ref must be a number'); }
+    if($xg_type=="" or $xg_key=="") { return (object)array('error'=>'xg_type and xgkey cannot be empty'); }
+    if(!preg_match('/^[0-9]+$/',$xg_rank)) { return (object)array('error'=>'xg_rank must be a number'); }
+    
+    $resource=get_resource_data($ref, true);
+    if(!$resource) { return (object)array('error'=>'a resource with that ref could not be found'); }
 
-        //lldebug($resource);
-        global $userref;
-        $userinfo=get_user($userref);
-        $user=$userinfo["username"] . "-" . $userinfo["fullname"];
-
-        $id = (int)sql_value(sprintf("select id as value from librarylink_link where ref=%s and xgtype='%s' and xgkey='%s'",$ref,escape_check($xg_type),escape_check($xg_key)),0);
-        if($id===0)
-            {
-            db_begin_transaction();
-            librarylink_update_ranks($xg_type, $xg_key, $xg_rank); //shift ranks up by one where we want to place a rank
-            sql_query(sprintf("INSERT into librarylink_log (ref,xgtype,xgkey,xgrank,operation,user,`time`) values (%s,'%s','%s',%s,'%s','%s','%s')",$ref,escape_check($xg_type),escape_check($xg_key),$xg_rank,"Move Links Ranks >= $xg_rank up one",escape_check($user),date('Y-m-d H:i:s')));
-            sql_query(sprintf("INSERT into librarylink_link (ref,xgtype,xgkey,xgrank,label) values (%s,'%s','%s',%s,'%s')",$ref,escape_check($xg_type),escape_check($xg_key),$xg_rank,''));
-            $id=sql_insert_id();
-            sql_query(sprintf("INSERT into librarylink_log (ref,xgtype,xgkey,xgrank,operation,user,`time`) values (%s,'%s','%s',%s,'%s','%s','%s')",$ref,escape_check($xg_type),escape_check($xg_key),$xg_rank,'Add Link',escape_check($user),date('Y-m-d H:i:s')));
-            db_end_transaction();
-            } else {
-                return (object)array('error'=>'a record link with that xgtype and xgkey already exists for this resource');
-            }
-
-        return $id; //link id
-    }
-
-function librarylink_delete_resource_link($ref, $xg_type, $xg_key, $delete_keywords)
-    {
-        if(!preg_match('/^[0-9]+$/',$ref)) { return (object)array('error'=>'resource ref must be a number'); }
-        if($xg_type=="" or $xg_key=="") { return (object)array('error'=>'xg_type and xgkey cannot be empty'); }
-        
-        $resource=get_resource_data($ref, true);
-        if(!$resource) { return (object)array('error'=>'a resource with that ref could not be found'); }
-
-        global $userref;
-        $userinfo=get_user($userref);
-        $user=$userinfo["username"] . "-" . $userinfo["fullname"];
-
-        $id = (int)sql_value(sprintf("select id as value from librarylink_link where ref=%s and xgtype='%s' and xgkey='%s'",$ref,escape_check($xg_type),escape_check($xg_key)),0);
-        if($id===0) { return (object)array('error'=>'the specified resource does not have a record link with that xgtype and xgkey'); }
-        
-        sql_query(sprintf("DELETE from librarylink_link where id=%s",$id));
-        sql_query(sprintf("INSERT into librarylink_log (ref,xgtype,xgkey,xgrank,operation,user,`time`) values (%s,'%s','%s',%s,'%s','%s','%s')",$ref,escape_check($xg_type),escape_check($xg_key),0,'Delete Link',escape_check($user),date('Y-m-d H:i:s')));
-
-        return $id; //link id
-    }
-
-function librarylink_modify_resource_link($ref, $xg_type, $xg_key, $xg_rank)
-    {
-        if(!preg_match('/^[0-9]+$/',$ref)) { return (object)array('error'=>'resource ref must be a number'); }
-        if($xg_type=="" or $xg_key=="") { return (object)array('error'=>'xg_type and xgkey cannot be empty'); }
-        if(!preg_match('/^[0-9]+$/',$xg_rank)) { return (object)array('error'=>'xg_rank must be a number'); }
-        
-        $resource=get_resource_data($ref, true);
-        if(!$resource) { return (object)array('error'=>'a resource with that ref could not be found'); }
-        
-        global $userref;
-        $userinfo=get_user($userref);
-        $user=$userinfo["username"] . "-" . $userinfo["fullname"];
-
-        $id = (int)sql_value(sprintf("select id as value from librarylink_link where ref=%s and xgtype='%s' and xgkey='%s'",$ref,escape_check($xg_type),escape_check($xg_key)),0);
-        if($id===0) { return (object)array('error'=>'the specified resource does not have a record link with that xgtype and xgkey'); }
-
+    //find or create the collection for this xgtype and xgkey pair
+    if($collection=librarylink_create_linked_collection($xg_type,$xg_key,$label))
+        {
+        if(in_array($ref,$collection['resources'])) return (object)array('error'=>'a record link with that xgtype and xgkey already exists for this resource');
         db_begin_transaction();
-        librarylink_update_ranks($xg_type, $xg_key, $xg_rank); //shift ranks up by one where we want to place a rank
-        sql_query(sprintf("INSERT into librarylink_log (ref,xgtype,xgkey,xgrank,operation,user,`time`) values (%s,'%s','%s',%s,'%s','%s','%s')",$ref,escape_check($xg_type),escape_check($xg_key),$xg_rank,"Move Links Ranks >= $xg_rank up one",escape_check($user),date('Y-m-d H:i:s')));
-        sql_query(sprintf("UPDATE librarylink_link set xgrank=%s where id=%s",$xg_rank,$id));
-        sql_query(sprintf("INSERT into librarylink_log (ref,xgtype,xgkey,xgrank,operation,user,`time`) values (%s,'%s','%s',%s,'%s','%s','%s')",$ref,escape_check($xg_type),escape_check($xg_key),$xg_rank,'Update Link Rank',escape_check($user),date('Y-m-d H:i:s')));
+        if($collection['resource_count']>0) librarylink_update_ranks($xg_type, $xg_key, $xg_rank); //shift ranks up by one where we want to place a rank
+        if(add_resource_to_collection($ref,$collection['ref']))
+            {   //at this point the new resource's sortorder will be null so update it
+            librarylink_set_rank_for_resource_by_collection_id($ref,$collection['ref'],$xg_rank);
+            if($add_keywords) librarylink_add_keyword_to_resource($ref,$collection['ref']);
+            }
         db_end_transaction();
+        librarylink_operation_log($ref,$xg_type, $xg_key, $xg_rank,'Add resource to record');
+        }
+    $collection=librarylink_get_linked_collection_by_id($collection['ref']);
+    return $collection;
+    }
+// function librarylink_delete_resource_link($ref, $xg_type, $xg_key, $delete_keywords)
+//     {
+//         if(!preg_match('/^[0-9]+$/',$ref)) { return (object)array('error'=>'resource ref must be a number'); }
+//         if($xg_type=="" or $xg_key=="") { return (object)array('error'=>'xg_type and xgkey cannot be empty'); }
+        
+//         $resource=get_resource_data($ref, true);
+//         if(!$resource) { return (object)array('error'=>'a resource with that ref could not be found'); }
 
-        return $id; //link id
+//         global $userref;
+//         $userinfo=get_user($userref);
+//         $user=$userinfo["username"] . "-" . $userinfo["fullname"];
+
+//         $id = (int)sql_value(sprintf("select id as value from librarylink_link where ref=%s and xgtype='%s' and xgkey='%s'",$ref,escape_check($xg_type),escape_check($xg_key)),0);
+//         if($id===0) { return (object)array('error'=>'the specified resource does not have a record link with that xgtype and xgkey'); }
+        
+//         sql_query(sprintf("DELETE from librarylink_link where id=%s",$id));
+//         sql_query(sprintf("INSERT into librarylink_log (ref,xgtype,xgkey,xgrank,operation,user,`time`) values (%s,'%s','%s',%s,'%s','%s','%s')",$ref,escape_check($xg_type),escape_check($xg_key),0,'Delete Link',escape_check($user),date('Y-m-d H:i:s')));
+
+//         return $id; //link id
+//     }
+
+function librarylink_delete_resource_link($ref, $xg_type, $xg_key, $delete_keywords=true)
+    {
+    if(!preg_match('/^[0-9]+$/',$ref)) { return (object)array('error'=>'resource ref must be a number'); }
+    if($xg_type=="" or $xg_key=="") { return (object)array('error'=>'xg_type and xgkey cannot be empty'); }
+    
+    $resource=get_resource_data($ref, true);
+    if(!$resource) { return (object)array('error'=>'a resource with that ref could not be found'); }
+
+    //find or create the collection for this xgtype and xgkey pair
+    if($collection=librarylink_get_linked_collection($xg_type, $xg_key))
+        {
+        if(!in_array($ref,$collection['resources'])) { return (object)array('error'=>'the specified resource does not have a record link with that xgtype and xgkey'); }
+        db_begin_transaction();
+        if(remove_resource_from_collection($ref,$collection['ref']))
+            {   
+            if($delete_keywords) { librarylink_remove_keyword_from_resource($ref,$collection['ref']); }
+            }
+        //at this point the removed resource will have left a hole in the ranks
+        if($collection['resource_count']>0) { librarylink_set_ranks_by_collection_id($collection['ref']); } //reorder the ranks
+        db_end_transaction();
+        librarylink_operation_log($ref,$xg_type, $xg_key, 0,'Remove resource from record');
+        }
+    $collection=librarylink_get_linked_collection_by_id($collection['ref']);
+    return $collection;
     }
 
-function librarylink_delete_links($xg_type, $xg_key, $delete_keywords)
+
+
+// function librarylink_modify_resource_link($ref, $xg_type, $xg_key, $xg_rank)
+//     {
+//         if(!preg_match('/^[0-9]+$/',$ref)) { return (object)array('error'=>'resource ref must be a number'); }
+//         if($xg_type=="" or $xg_key=="") { return (object)array('error'=>'xg_type and xgkey cannot be empty'); }
+//         if(!preg_match('/^[0-9]+$/',$xg_rank)) { return (object)array('error'=>'xg_rank must be a number'); }
+        
+//         $resource=get_resource_data($ref, true);
+//         if(!$resource) { return (object)array('error'=>'a resource with that ref could not be found'); }
+        
+//         global $userref;
+//         $userinfo=get_user($userref);
+//         $user=$userinfo["username"] . "-" . $userinfo["fullname"];
+
+//         $id = (int)sql_value(sprintf("select id as value from librarylink_link where ref=%s and xgtype='%s' and xgkey='%s'",$ref,escape_check($xg_type),escape_check($xg_key)),0);
+//         if($id===0) { return (object)array('error'=>'the specified resource does not have a record link with that xgtype and xgkey'); }
+
+//         db_begin_transaction();
+//         librarylink_update_ranks($xg_type, $xg_key, $xg_rank); //shift ranks up by one where we want to place a rank
+//         sql_query(sprintf("INSERT into librarylink_log (ref,xgtype,xgkey,xgrank,operation,user,`time`) values (%s,'%s','%s',%s,'%s','%s','%s')",$ref,escape_check($xg_type),escape_check($xg_key),$xg_rank,"Move Links Ranks >= $xg_rank up one",escape_check($user),date('Y-m-d H:i:s')));
+//         sql_query(sprintf("UPDATE librarylink_link set xgrank=%s where id=%s",$xg_rank,$id));
+//         sql_query(sprintf("INSERT into librarylink_log (ref,xgtype,xgkey,xgrank,operation,user,`time`) values (%s,'%s','%s',%s,'%s','%s','%s')",$ref,escape_check($xg_type),escape_check($xg_key),$xg_rank,'Update Link Rank',escape_check($user),date('Y-m-d H:i:s')));
+//         db_end_transaction();
+
+//         return $id; //link id
+//     }
+
+function librarylink_modify_resource_link_rank($ref, $xg_type, $xg_key, $xg_rank)
+    {
+    if(!preg_match('/^[0-9]+$/',$ref)) { return (object)array('error'=>'resource ref must be a number'); }
+    if($xg_type=="" or $xg_key=="") { return (object)array('error'=>'xg_type and xgkey cannot be empty'); }
+    if(!preg_match('/^[0-9]+$/',$xg_rank)) { return (object)array('error'=>'xg_rank must be a number'); }
+    
+    $resource=get_resource_data($ref, true);
+    if(!$resource) { return (object)array('error'=>'a resource with that ref could not be found'); }
+        
+    //find or create the collection for this xgtype and xgkey pair
+    if($collection=librarylink_get_linked_collection($xg_type, $xg_key))
+        {
+        if(!in_array($ref,$collection['resources'])) { return (object)array('error'=>'the specified resource does not have a record link with that xgtype and xgkey'); }
+        db_begin_transaction();
+        
+        if($collection['resource_count']>1)           
+            {
+            librarylink_set_rank_for_resource_by_collection_id($ref,$collection['ref'],999999); //move our resource out of the way
+            librarylink_set_ranks_by_collection_id($collection['ref']); //reorder the ranks
+            librarylink_update_ranks($xg_type, $xg_key, $xg_rank); //shift ranks up by one where we want to place a rank
+            } 
+        librarylink_set_rank_for_resource_by_collection_id($ref,$collection['ref'],$xg_rank); //move our rank into that space
+        if($collection['resource_count']>1) { librarylink_set_ranks_by_collection_id($collection['ref']); } //reorder the ranks
+        db_end_transaction();
+        librarylink_operation_log($ref,$xg_type, $xg_key, $xg_rank,'Change resource rank');
+        }
+    $collection=librarylink_get_linked_collection_by_id($collection['ref']);
+    return $collection;
+    }
+
+
+// function librarylink_delete_links($xg_type, $xg_key, $delete_keywords)
+//     {
+//         if($xg_type=="" or $xg_key=="") { return (object)array('error'=>'xg_type and xgkey cannot be empty'); }
+
+//         $resource_ids = sql_array(sprintf("SELECT ref as value from librarylink_link where xgtype='%s' and xgkey='%s'",escape_check($xg_type),escape_check($xg_key)));
+//         if(count($resource_ids)===0) { return (object)array('error'=>'no resources were found with that xgtype and xgkey'); }
+//         for($i=0;$i<count($resource_ids);$i++) $resource_ids[$i]=(int)$resource_ids[$i]; //cast all result to int
+
+//         global $userref;
+//         $userinfo=get_user($userref);
+//         $user=$userinfo["username"] . "-" . $userinfo["fullname"];
+
+//         sql_query(sprintf("DELETE from librarylink_link where ref in (%s) and xgtype='%s' and xgkey='%s'",implode(',',$resource_ids),escape_check($xg_type),escape_check($xg_key)));
+//         foreach($resource_ids as $ref)
+//             {
+//                 sql_query(sprintf("INSERT into librarylink_log (ref,xgtype,xgkey,xgrank,operation,user,`time`) values (%s,'%s','%s',%s,'%s','%s','%s')",$ref,escape_check($xg_type),escape_check($xg_key),0,'Delete Link',escape_check($user),date('Y-m-d H:i:s')));
+//             }
+        
+//         return $resource_ids; //list of resource ids
+//     }
+
+//remove all linked resources from a record (and optionally remove the linked collection too)
+function librarylink_delete_links($xg_type, $xg_key, $delete_keywords=true, $delete_collection=false)
     {
         if($xg_type=="" or $xg_key=="") { return (object)array('error'=>'xg_type and xgkey cannot be empty'); }
 
-        $resource_ids = sql_array(sprintf("SELECT ref as value from librarylink_link where xgtype='%s' and xgkey='%s'",escape_check($xg_type),escape_check($xg_key)));
-        if(count($resource_ids)===0) { return (object)array('error'=>'no resources were found with that xgtype and xgkey'); }
-        for($i=0;$i<count($resource_ids);$i++) $resource_ids[$i]=(int)$resource_ids[$i]; //cast all result to int
-
-        global $userref;
-        $userinfo=get_user($userref);
-        $user=$userinfo["username"] . "-" . $userinfo["fullname"];
-
-        sql_query(sprintf("DELETE from librarylink_link where ref in (%s) and xgtype='%s' and xgkey='%s'",implode(',',$resource_ids),escape_check($xg_type),escape_check($xg_key)));
+        if($collection_id=sql_value(sprintf("SELECT collection as value from librarylink_collection where xgtype='%s' and xgkey='%s'",escape_check($xg_type),escape_check($xg_key)),false))
+        //get a list of resources that are in this librarylink collection
+        $resource_ids=sql_array(sprintf("SELECT resource as value from librarylink_collection left join collection_resource on collection_ref=collection where collection_ref=%s order by link,sortorder asc,date_added desc",$collection_id));       
         foreach($resource_ids as $ref)
             {
-                sql_query(sprintf("INSERT into librarylink_log (ref,xgtype,xgkey,xgrank,operation,user,`time`) values (%s,'%s','%s',%s,'%s','%s','%s')",$ref,escape_check($xg_type),escape_check($xg_key),0,'Delete Link',escape_check($user),date('Y-m-d H:i:s')));
+            if($delete_keywords) librarylink_remove_keyword_from_resource($ref,$collection_id);
+            if(remove_resource_from_collection($ref,$collection_id))
+                {
+                lldebug(sprintf("Removed resource: %s from collection: %s",$ref,$collection_id));
+                }
             }
-        
-        return $resource_ids; //list of resource ids
+            if($delete_collection) 
+                {
+                delete_collection($collection_id);
+                lldebug(sprintf("Deleted collection with id: %s",$collection_id));
+                }
+
+        librarylink_operation_log('',$xg_type, $xg_key,0,'Removed all resources from link');
+        return $resource_ids;
     }
 
-    function librarylink_delete_links_by_ref($ref, $delete_keywords)
+// function librarylink_delete_links_by_ref($ref, $delete_keywords)
+//     {
+//         if(!preg_match('/^[0-9]+$/',$ref)) { return (object)array('error'=>'resource ref must be a number'); }
+
+//         $resource=get_resource_data($ref, true);
+//         if(!$resource) { return (object)array('error'=>'a resource with that ref could not be found'); }
+
+//         global $userref;
+//         $userinfo=get_user($userref);
+//         $user=$userinfo["username"] . "-" . $userinfo["fullname"];
+
+//         sql_query(sprintf("DELETE from librarylink_link where ref=%s",$ref));
+//         sql_query(sprintf("INSERT into librarylink_log (ref,xgtype,xgkey,xgrank,operation,user,`time`) values (%s,'%s','%s',%s,'%s','%s','%s')",$ref,'','',0,'Delete all links',escape_check($user),date('Y-m-d H:i:s')));
+        
+//         return true;
+//     }
+
+//deletes all record links that a resource may have (and optionally check if the resource actually existed)
+function librarylink_delete_links_by_ref($ref, $delete_keywords=true, $check_exists=true)
     {
         if(!preg_match('/^[0-9]+$/',$ref)) { return (object)array('error'=>'resource ref must be a number'); }
 
-        $resource=get_resource_data($ref, true);
-        if(!$resource) { return (object)array('error'=>'a resource with that ref could not be found'); }
+        if($check_exists)
+            {
+            $resource=get_resource_data($ref, true);
+            if(!$resource) { return (object)array('error'=>'a resource with that ref could not be found'); }
+            }
 
-        global $userref;
-        $userinfo=get_user($userref);
-        $user=$userinfo["username"] . "-" . $userinfo["fullname"];
+        //get a list of librarylink collections that contain this resource
+        $collections=sql_array(sprintf("SELECT collection as value from librarylink_collection left join collection_resource on collection_ref=collection where resource=%s order by link,sortorder asc,date_added desc",$ref));       
+        foreach($collections as $collection)
+            {
+            if($delete_keywords) librarylink_remove_keyword_from_resource($ref,$collection['collection']);
+            if(remove_resource_from_collection($ref,$collection['collection']))
+                {
+                lldebug(sprintf("Removed resource: %s from collection: %s",$ref,$collection['collection']));
+                }
+            }
 
-        sql_query(sprintf("DELETE from librarylink_link where ref=%s",$ref));
-        sql_query(sprintf("INSERT into librarylink_log (ref,xgtype,xgkey,xgrank,operation,user,`time`) values (%s,'%s','%s',%s,'%s','%s','%s')",$ref,'','',0,'Delete all links',escape_check($user),date('Y-m-d H:i:s')));
-        
+        librarylink_operation_log($ref,'','',0,'Delete all links for resource');        
         return true;
     }
 
-function librarylink_get_all_links()
+function librarylink_operation_log($resource,$xg_type,$xg_key,$xg_rank,$operation)
     {
-        $records=sql_query("SELECT concat(xgtype,' - ',xgkey) as link, ref from librarylink_link order by xgtype,xgkey,xgrank");
-        $result=array();
-        if(count($records))
-            {
-            foreach($records as $r) $result[$r['link']][]=$r['ref'];
-            }
-        return $result;
+    global $userref;
+    $userinfo=get_user($userref);
+    $user=$userinfo["username"] . "-" . $userinfo["fullname"];
+    $time=date('Y-m-d H:i:s');
+    sql_query(sprintf("INSERT into librarylink_log (ref,xgtype,xgkey,xgrank,operation,user,`time`) values ('%s','%s','%s',%s,'%s','%s','%s')",escape_check($resource),escape_check($xg_type),escape_check($xg_key),escape_check($xg_rank),escape_check($operation),escape_check($user),escape_check($time)));
     }
 
+// function librarylink_get_all_links()
+//     {
+//         $records=sql_query("SELECT concat(xgtype,' - ',xgkey) as link, ref from librarylink_link order by xgtype,xgkey,xgrank");
+//         $result=array();
+//         if(count($records))
+//             {
+//             foreach($records as $r) $result[$r['link']][]=$r['ref'];
+//             }
+//         return $result;
+//     }
+function librarylink_get_all_links()
+    {
+    $records=sql_query("SELECT concat(xgtype,'_',xgkey) as link, resource from librarylink_collection left join collection_resource on collection_ref=collection order by link,sortorder asc,date_added desc");
+    $result=array();
+    if(count($records))
+        {
+        foreach($records as $r) $result[$r['link']][]=$r['resource'];
+        }
+    lldebug($result);
+    return $result;
+    }
+
+// function librarylink_do_search($xg_type, $xg_key, $fetchrows, $sort)
+//     {
+//         $resources=array();
+//         if(!preg_match('/^[0-9]+$/',$fetchrows)) $fetchrows=0;
+//         if(!in_array($sort,array('asc','desc'))) $sort='asc';
+//         $limit=$fetchrows>0?'limit '.$fetchrows:'';
+//         $order=' ORDER BY xgrank '.$sort;
+
+//         if($xg_type=="" and $xg_key=="") { return $resources; }
+//         if($xg_type=="") { $links = sql_query(sprintf("SELECT * from librarylink_link where xgkey='%s' %s %s",escape_check($xg_key),$order,$limit)); }
+//         elseif($xg_key=="") { $links = sql_query(sprintf("SELECT * from librarylink_link where xgtype='%s' %s %s",escape_check($xg_type),$order,$limit)); }
+//         else $links = sql_query(sprintf("SELECT * from librarylink_link where xgtype='%s' and xgkey='%s' %s %s",escape_check($xg_type),escape_check($xg_key),$order,$limit));
+
+//         if(count($links)===0) { return $resources; }
+//         //lldebug($links);
+//         foreach($links as $link)
+//         {
+//             $resource=get_resource_data($link["ref"], true);
+//             $resource['xg_type']=$link['xgtype'];
+//             $resource['xg_key']=$link['xgkey'];
+//             $resource['xg_rank']=$link['xgrank'];
+//             //lldebug($resource);
+//             $resources[]=$resource; 
+//         }
+//         return $resources;
+//     }
 function librarylink_do_search($xg_type, $xg_key, $fetchrows, $sort)
     {
         $resources=array();
         if(!preg_match('/^[0-9]+$/',$fetchrows)) $fetchrows=0;
         if(!in_array($sort,array('asc','desc'))) $sort='asc';
         $limit=$fetchrows>0?'limit '.$fetchrows:'';
-        $order=' ORDER BY xgrank '.$sort;
+        if($sort=='asc')  $order=' ORDER BY sortorder asc,date_added desc';
+        if($sort=='desc') $order=' ORDER BY sortorder desc,date_added asc';
 
-        if($xg_type=="" and $xg_key=="") { return $resources; }
-        if($xg_type=="") { $links = sql_query(sprintf("SELECT * from librarylink_link where xgkey='%s' %s %s",escape_check($xg_key),$order,$limit)); }
-        elseif($xg_key=="") { $links = sql_query(sprintf("SELECT * from librarylink_link where xgtype='%s' %s %s",escape_check($xg_type),$order,$limit)); }
-        else $links = sql_query(sprintf("SELECT * from librarylink_link where xgtype='%s' and xgkey='%s' %s %s",escape_check($xg_type),escape_check($xg_key),$order,$limit));
+        if($xg_type=='' and $xg_key=='') { return $resources; }
+        if($xg_type=='') { $links = sql_query(sprintf("SELECT * from librarylink_collection left join collection_resource on collection_ref=collection where xgkey='%s' %s %s",escape_check($xg_key),$order,$limit)); }
+        elseif($xg_key=='') { $links = sql_query(sprintf("SELECT * from librarylink_collection left join collection_resource on collection_ref=collection where xgtype='%s' %s %s",escape_check($xg_type),$order,$limit)); }
+        else $links = sql_query(sprintf("SELECT * from librarylink_collection left join collection_resource on collection_ref=collection where xgtype='%s' and xgkey='%s' %s %s",escape_check($xg_type),escape_check($xg_key),$order,$limit));
 
         if(count($links)===0) { return $resources; }
         //lldebug($links);
         foreach($links as $link)
         {
-            $resource=get_resource_data($link["ref"], true);
+            $resource=get_resource_data($link["resource"], true);
             $resource['xg_type']=$link['xgtype'];
             $resource['xg_key']=$link['xgkey'];
-            $resource['xg_rank']=$link['xgrank'];
+            $resource['xg_rank']=$link['sortorder'];
+            $resource['label']=$link['label'];
             //lldebug($resource);
             $resources[]=$resource; 
         }
         return $resources;
     }
 
+// function librarylink_get_ranks($xg_type, $xg_key)
+//     {
+//         $resources=array();
+//         if($xg_type=="" or $xg_key=="") { return $resources; }        
+//         $links = sql_query(sprintf("SELECT ref,xgrank from librarylink_link where xgtype='%s' and xgkey='%s' order by xgrank asc",escape_check($xg_type),escape_check($xg_key)));
+//         if(count($links)===0) { return $resources; }
+//         foreach($links as $link)
+//             {
+//             $resources[$link['ref']]=$link['xgrank'];
+//             }
+//         return $resources;        
+//     }
+
 function librarylink_get_ranks($xg_type, $xg_key)
     {
         $resources=array();
         if($xg_type=="" or $xg_key=="") { return $resources; }        
-        $links = sql_query(sprintf("SELECT ref,xgrank from librarylink_link where xgtype='%s' and xgkey='%s' order by xgrank asc",escape_check($xg_type),escape_check($xg_key)));
+        $links = sql_query(sprintf("SELECT resource,sortorder from librarylink_collection left join collection_resource on collection_ref=collection where xgtype='%s' and xgkey='%s' ORDER BY sortorder asc,date_added desc",escape_check($xg_type),escape_check($xg_key)));
         if(count($links)===0) { return $resources; }
         foreach($links as $link)
             {
-            $resources[$link['ref']]=$link['xgrank'];
+            $resources[$link['resource']]=$link['sortorder'];
             }
         return $resources;        
     }
 
+//make sure that all resources in a collection have a sort order (and not null)
+function librarylink_set_ranks($xg_type, $xg_key)
+    {
+        if($collection_id=sql_value(sprintf("SELECT collection as value from librarylink_collection where xgtype='%s' and xgkey='%s'",escape_check($xg_type),escape_check($xg_key)),false))
+            {
+            librarylink_set_ranks_by_collection_id($collection_id);
+            }
+    }
+//make sure that all resources in a collection (by id) have a sort order (and not null)
+function librarylink_set_ranks_by_collection_id($collection_id)
+    {
+    if(preg_match('/^[0-9]+$/',$collection_id) and $collection_id>0)
+        {
+        $ranks=sql_array(sprintf("SELECT resource as value from collection_resource where collection=%s ORDER BY sortorder asc,date_added desc",$collection_id));
+        update_collection_order($ranks,$collection_id);
+        lldebug(sprintf("Resource order ranks set for resources: %s",implode(',',$ranks)));
+        }        
+    }
+
+function librarylink_set_rank_for_resource_by_collection_id($ref,$collection_id, $xg_rank)
+    {
+    if(!(preg_match('/^[0-9]+$/',$ref) and $ref>0)) return;
+    if(!(preg_match('/^[0-9]+$/',$collection_id) and $collection_id>0)) return;
+    if(!(preg_match('/^[0-9]+$/',$xg_rank) and $xg_rank>0)) return;
+    
+    $sql=sprintf("update collection_resource set sortorder=%s where collection=%s and resource=%s",$xg_rank,$collection_id,$ref);
+    sql_query($sql);
+    lldebug(sprintf("Set resource: %s in collection: %s to rank: %s",$ref,$collection_id,$xg_rank));
+    }
+
+// function librarylink_update_ranks($xg_type, $xg_key, $xg_rank)
+//     {
+//         if(!preg_match('/^[0-9]+$/',$xg_rank)) $xg_rank=1;
+//         sql_query(sprintf("UPDATE librarylink_link set xgrank=xgrank+1 where xgtype='%s' and xgkey='%s' and xgrank>=%s",escape_check($xg_type),escape_check($xg_key),$xg_rank));
+//     }
+
+//shift ranks up on above and equal to the rank that we specify to make space for a new resource to take that rank
 function librarylink_update_ranks($xg_type, $xg_key, $xg_rank)
     {
         if(!preg_match('/^[0-9]+$/',$xg_rank)) $xg_rank=1;
-        sql_query(sprintf("UPDATE librarylink_link set xgrank=xgrank+1 where xgtype='%s' and xgkey='%s' and xgrank>=%s",escape_check($xg_type),escape_check($xg_key),$xg_rank));
+        sql_query(sprintf("UPDATE librarylink_collection left join collection_resource on collection_ref=collection set sortorder=sortorder+1 where xgtype='%s' and xgkey='%s' and sortorder>=%s",escape_check($xg_type),escape_check($xg_key),$xg_rank));
     }
 
-
-
+//add a keyword to a resource based upon the xgtype and xgkey of the librarylink collection which is specified by id
 function librarylink_add_keyword_to_resource($ref,$usercollection)
     {
     global $librarylink_record_keywords_field;
@@ -298,6 +533,7 @@ function librarylink_add_keyword_to_resource($ref,$usercollection)
         }               
     }
 
+//remove a keyword from a resource based upon the xgtype and xgkey of the librarylink collection which is specified by id
 function librarylink_remove_keyword_from_resource($ref,$usercollection)
     {
     global $librarylink_record_keywords_field;
@@ -329,19 +565,28 @@ function librarylink_get_linked_collection($xg_type, $xg_key)
     $xg_type=trim($xg_type);
     $xg_key=trim($xg_key);
     if($xg_type=='' or $xg_key=='') return false;
-    //first check if collection already exists
-    $sql=sprintf("select collection_ref,ref,name,description from librarylink_collection left join collection on collection_ref=ref where xgtype='%s' and xgkey='%s'",escape_check($xg_type),escape_check($xg_key));
+    $sql=sprintf("select collection_ref,xgtype,xgkey,label,ref,name,description,count(resource) as resource_count from librarylink_collection left join collection on collection_ref=ref left join collection_resource on ref=collection where xgtype='%s' and xgkey='%s'",escape_check($xg_type),escape_check($xg_key));
     $result=sql_query($sql);
-    if(isset($result[0]['collection_ref']) and $result[0]['ref']>0) return $result[0];
+    if(isset($result[0]['collection_ref']) and $result[0]['ref']>0)
+        {
+            $resources=sql_array(sprintf("SELECT resource as value from librarylink_collection left join collection_resource on collection_ref=collection where xgtype='%s' and xgkey='%s' ORDER BY sortorder asc,date_added desc",escape_check($xg_type),escape_check($xg_key)));
+            $result[0]['resources']=$resources;
+            return $result[0];
+        }
     return false;
     }
 
 function librarylink_get_linked_collection_by_id($ref)
     {
     if(!preg_match('/^[0-9]+$/',$ref)) return false;
-    $sql=sprintf("select collection_ref,xgtype,xgkey,label,ref,name,description from librarylink_collection left join collection on collection_ref=ref where collection_ref=%s",$ref);
+    $sql=sprintf("select collection_ref,xgtype,xgkey,label,ref,name,description,count(resource) as resource_count from librarylink_collection left join collection on collection_ref=ref left join collection_resource on ref=collection where collection_ref=%s",$ref);
     $result=sql_query($sql);
-    if(isset($result[0]['collection_ref']) and $result[0]['ref']>0) return $result[0];
+    if(isset($result[0]['collection_ref']) and $result[0]['ref']>0)
+        {
+            $resources=sql_array(sprintf("SELECT resource as value from librarylink_collection left join collection_resource on collection_ref=collection where collection_ref=%s ORDER BY sortorder asc,date_added desc",$ref));
+            $result[0]['resources']=$resources;
+            return $result[0];
+        }
     return false;
     }
 
@@ -351,17 +596,25 @@ function librarylink_create_linked_collection($xg_type, $xg_key, $label='')
     $xg_type=trim($xg_type);
     $xg_key=trim($xg_key);
     if($xg_type=='' or $xg_key=='') return false;
-    $label=trim($label);
     $description=sprintf($lang['librarylink_collection_description'],$xg_type,$label,$xg_key);
     $name=sprintf($lang['librarylink_collection_name'],$xg_type,$label?$label:$xg_key);
+    $session=isset($_COOKIE['user'])?$_COOKIE['user']:'';
     
     //check if collection exists and looks ok
     $create_collection=$update_collection=false;
     $collection=librarylink_get_linked_collection($xg_type, $xg_key);    
     if(false===$collection) $create_collection=true;
     if(isset($collection['ref']) and ! ($collection['ref']>0)) $create_collection=true;
-    if(isset($collection['description']) and $collection['description']!=$description) $update_collection=true;
-    if(isset($collection['name']) and $collection['name']!=$name) $update_collection=true;
+
+    if($label=='') //don't update the name or description if label was empty
+        {
+        $name=$collection['name'];
+        $description=$collection['description'];
+        } else {
+        if($collection['description']!=$description) $update_collection=true;
+        if($collection['name']!=$name) $update_collection=true;
+        $collection['label']=$label;
+        }    
 
     if($create_collection)
         { 
@@ -372,7 +625,8 @@ function librarylink_create_linked_collection($xg_type, $xg_key, $label='')
             sql_query($sql);
             $sql=sprintf("insert into librarylink_collection(collection_ref,xgtype,xgkey,label) values (%s,'%s','%s','%s')",$collection['ref'],escape_check($xg_type),escape_check($xg_key),escape_check($label));
             sql_query($sql);        
-            lldebug(sprintf("Created collection with id: %s for session: %s and request: %s",$collection['ref'],$_COOKIE['user'],$_SERVER['REQUEST_URI']));  
+            lldebug(sprintf("Created collection with id: %s for session: %s and request: %s",$collection['ref'],$session,$_SERVER['REQUEST_URI']));
+            $collection=librarylink_get_linked_collection($xg_type, $xg_key); 
             } else {
             $message=sprintf($lang['librarylink_collection_failed'],$name);
             lldebug($message);
@@ -383,9 +637,9 @@ function librarylink_create_linked_collection($xg_type, $xg_key, $label='')
         {
         $collection['description']=$description;
         $collection['name']=$name;
-        $sql=sprintf("update collection set name='%s',description='%s' where ref=%s",escape_check($collection['name']),escape_check($collection['description']),$collection['ref']);
+        $sql=sprintf("update librarylink_collection left join collection on collection_ref=ref set name='%s',description='%s',label='%s' where collection_ref=%s",escape_check($collection['name']),escape_check($collection['description']),escape_check($collection['label']),$collection['ref']);
         sql_query($sql);        
-        lldebug(sprintf("Updated collection with id: %s for session: %s and request: %s",$collection['ref'],$_COOKIE['user'],$_SERVER['REQUEST_URI']));  
+        lldebug(sprintf("Updated collection with id: %s for session: %s and request: %s",$collection['ref'],$session,$_SERVER['REQUEST_URI']));  
         }
 
     return $collection;
@@ -394,30 +648,37 @@ function librarylink_create_linked_collection($xg_type, $xg_key, $label='')
 function librarylink_add_user_to_linked_collection($collection_id)
     {
     global $userref;
+    $session=isset($_COOKIE['user'])?$_COOKIE['user']:'';
     if($collection_id>0) 
         {
-        add_collection($userref,$collection_id); //add current user to the collection
-        lldebug(sprintf("Added user: %s to collection: %s for session: %s and request: %s",$userref,$collection_id,$_COOKIE['user'],$_SERVER['REQUEST_URI']));
+        //we can't use this - it fills up the logs!!
+        //add_collection($userref,$collection_id); //add current user to the collection
+        sql_query(sprintf("insert into user_collection (user,collection,request_feedback) values (%s,%s,0)",$userref,$collection_id));
+        lldebug(sprintf("Added user: %s to collection: %s for session: %s and request: %s",$userref,$collection_id,$session,$_SERVER['REQUEST_URI']));
         }
     }
 
 function librarylink_remove_user_from_linked_collection($collection_id)
     {
     global $userref;
+    $session=isset($_COOKIE['user'])?$_COOKIE['user']:'';
     if($collection_id>0) 
         {
-        remove_collection($userref,$collection_id); //remove current user from the collection
-        lldebug(sprintf("Removed user: %s from collection: %s for session: %s and request: %s",$userref,$collection_id,$_COOKIE['user'],$_SERVER['REQUEST_URI']));
+        //we can't use this - it fills up the logs!!
+        //remove_collection($userref,$collection_id); //remove current user from the collection
+        sql_query(sprintf("delete from user_collection where user=%s and collection=%s",$userref,$collection_id));
+        lldebug(sprintf("Removed user: %s from collection: %s for session: %s and request: %s",$userref,$collection_id,$session,$_SERVER['REQUEST_URI']));
         }
     }
 
 function librarylink_remove_linked_collections_from_user($userref,$collection_ids)
     {
         if(!is_array($collection_ids) or count($collection_ids)==0) return;
+        $session=isset($_COOKIE['user'])?$_COOKIE['user']:'';
         $collections=implode(',',$collection_ids);        
         $sql=sprintf("delete from user_collection where user=%s and collection in (%s)",$userref,$collections);
         sql_query($sql);
-        lldebug(sprintf("Deleted collections: %s for user: %s with session: %s and request: %s",$collections,$userref,$_COOKIE['user'],$_SERVER['REQUEST_URI']));
+        lldebug(sprintf("Removed collections: %s from user: %s with session: %s and request: %s",$collections,$userref,$session,$_SERVER['REQUEST_URI']));
     }
 
 function librarylink_is_linked_collection($usercollection)
@@ -431,41 +692,41 @@ function librarylink_is_linked_collection($usercollection)
 
 function librarylink_get_linked_collections($userref)
     {
-        $sql=sprintf("select collection_ref as value from librarylink_collection left join user_collection on collection_ref=collection and user=%s",$userref);
+        $sql=sprintf("select collection_ref as value from librarylink_collection left join user_collection on collection_ref=collection where user=%s",$userref);
         $collection_ids=sql_array($sql);
         return $collection_ids;
     }
 
-function librarylink_get_link_parameters($set_cookies=true)
+function librarylink_get_link_parameters()
     {
         global $links_changed;
         $links=array();
         $links_changed=false;
+        //get or post values given for ll_type and ll_keys ?
         if(isset($_REQUEST['ll_type'])) $ll_type=trim($_REQUEST['ll_type']); else $ll_type='';
         if(isset($_REQUEST['ll_keys'])) $ll_keys=trim($_REQUEST['ll_keys']); else $ll_keys='';
-        if($ll_type!='' and $ll_keys!='') 
+        if($ll_type!='' and $ll_keys!='') //we have both values
             {
-            if(isset($_COOKIE['ll_type']) and $ll_type!=$_COOKIE['ll_type']) $links_changed=true;
-            if(isset($_COOKIE['ll_keys']) and $ll_keys!=$_COOKIE['ll_keys']) $links_changed=true;
-            if($set_cookies or $links_changed)
+            if(isset($_COOKIE['ll_type']))
+                {
+                if($ll_type!=$_COOKIE['ll_type']) $links_changed=true; //if get or post != cookie value then links changed
+                } else $links_changed=true;                             //if we never had a cookie value then links changed
+            if(isset($_COOKIE['ll_keys']))
+                {
+                if($ll_keys!=$_COOKIE['ll_keys']) $links_changed=true; //if get or post != cookie value then links changed
+                } else $links_changed=true;                             //if we never had a cookie value then links changed
+            
+            if($links_changed) //links changed so set or reset cookies
                 {
                 rs_setcookie('ll_type',$ll_type,0,"","",false,false);
                 rs_setcookie('ll_keys',$ll_keys,0,"","",false,false);
                 }
-            } else {
+            } else { //no links given in get or post so check cookies
             if(isset($_COOKIE['ll_type'])) $ll_type=$_COOKIE['ll_type']; else $ll_type='';
             if(isset($_COOKIE['ll_keys'])) $ll_keys=$_COOKIE['ll_keys']; else $ll_keys='';  
-            if($ll_type!='' and $ll_keys!='') 
-                {
-                if($set_cookies or $links_changed)
-                    {
-                    rs_setcookie('ll_type',$ll_type,0,"","",false,false);
-                    rs_setcookie('ll_keys',$ll_keys,0,"","",false,false);
-                    }
-                }
             }
 
-        if($ll_type=='' or $ll_keys=='') return $links;
+        if($ll_type=='' or $ll_keys=='') return $links; //nope, no links if neither get,post or cookies
 
         $keys=explode(',',$ll_keys);
         sort($keys);
@@ -478,7 +739,7 @@ function librarylink_get_link_parameters($set_cookies=true)
             $links[$i]['label']=isset($tmp[1])?trim($tmp[1]):'';
             }
         lldebug("Links:");
-        lldebug($links);
+        foreach($links as $link) lldebug(sprintf("%s_%s (%s)",$link['xg_type'],$link['xg_key'],$link['label']));
         return $links;
     }
 

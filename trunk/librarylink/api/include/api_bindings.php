@@ -12,9 +12,9 @@ function api_librarylink_test($ref)
     }
 
 
-function api_librarylink_add_resource_link($ref, $xg_type, $xg_key, $xg_rank=1, $add_keywords = true)
+function api_librarylink_add_resource_link($ref, $xg_type, $xg_key, $label='', $xg_rank=1, $add_keywords = true)
     {
-    return librarylink_add_resource_link($ref, $xg_type, $xg_key, $xg_rank, $add_keywords);
+    return librarylink_add_resource_link($ref, $xg_type, $xg_key, $label, $xg_rank, $add_keywords);
     }
 
 function api_librarylink_delete_resource_link($ref, $xg_type, $xg_key, $delete_keywords = true)
@@ -22,14 +22,19 @@ function api_librarylink_delete_resource_link($ref, $xg_type, $xg_key, $delete_k
     return librarylink_delete_resource_link($ref, $xg_type, $xg_key, $delete_keywords);
     }
 
-function api_librarylink_modify_resource_link($ref, $xg_type, $xg_key, $xg_rank)
+function api_librarylink_modify_resource_link_rank($ref, $xg_type, $xg_key, $xg_rank)
     {
-    return librarylink_modify_resource_link($ref, $xg_type, $xg_key, $xg_rank);
+    return librarylink_modify_resource_link_rank($ref, $xg_type, $xg_key, $xg_rank);
     }
 
-function api_librarylink_delete_links($xg_type, $xg_key, $delete_keywords = true)
+function api_librarylink_get_linked_resources($xg_type, $xg_key)
     {
-    return librarylink_delete_links($xg_type, $xg_key, $delete_keywords);
+    return librarylink_get_linked_collection($xg_type, $xg_key);
+    }
+
+function api_librarylink_delete_links($xg_type, $xg_key, $delete_keywords = true, $delete_collection=false)
+    {
+    return librarylink_delete_links($xg_type, $xg_key, $delete_keywords, $delete_collection);
     }
 
 function api_librarylink_delete_links_by_ref($ref, $delete_keywords = true)
