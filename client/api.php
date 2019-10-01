@@ -122,6 +122,7 @@ if(isset($_POST['Execute']) or isset($_GET['Execute'])) {
 <!-- Load jQuery-->
 <script src="../lib/js/jquery-3.3.1.min.js"></script>
 <?php print $script; ?>
+<link type="text/css" href="styles.css" rel="stylesheet" />
 </head>
 <body lang="en" class="api">
 <form method="post" action="api.php" enctype="multipart/form-data">

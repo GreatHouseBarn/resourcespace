@@ -18,6 +18,9 @@ $mysql_bin_path = '/usr/bin';
 # Base URL of the installation
 $baseurl = 'https://resourcespace.ateb.co.uk';
 
+# $xframe_options - set this to DENY (prevent all), SAMEORIGIN or ALLOW-FROM with a URL to allow site to be used in an iframe. To disable completely set to "";
+$xframe_options = "allow-from https://llclient.ateb.wales/";
+
 # Email settings
 $email_notify = 'simon@ateb.co.uk';
 $email_from = 'resourcespace@ateb.co.uk';
