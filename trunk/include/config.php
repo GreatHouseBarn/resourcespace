@@ -12,8 +12,19 @@ $mysql_server = 'localhost';
 $mysql_username = 'resourcespace';
 $mysql_password = 'R350urc3$pac3';
 $mysql_db = 'resourcespace';
-
 $mysql_bin_path = '/usr/bin';
+
+$applicationname="LibraryLink"; # The name of your implementation / installation (e.g. 'MyCompany Resource System')
+$applicationdesc=""; # Subtitle (i18n translated) if $header_text_title=true;
+$header_favicon="gfx/interface/favicon.png";
+#replace header logo with text, application name and description
+$header_text_title=false;
+# Is the logo a link to the home page?
+$header_link=true;
+# Header size class. Options are HeaderSmall, HeaderMid, HeaderLarge.
+$header_size="HeaderMid";
+# Header includes username to right of user menu icon
+$header_include_username=true;
 
 # Base URL of the installation
 $baseurl = 'https://resourcespace.ateb.co.uk';
@@ -251,3 +262,15 @@ $session_autologout = true;
 # Randomised session hash?
 # Setting to 'true' means each new session is completely unique each login. This may be more secure as the hash is less easy to guess but means that only one user can use a given user account at any one time.
 $randomised_session_hash=true;
+
+// $enable_ckeditor = true;
+// $ckeditor_toolbars="'Styles', 'Bold', 'Italic', 'Underline','FontSize', 'RemoveFormat', 'TextColor','BGColor'";
+// $ckeditor_content_toolbars="
+// 	{ name: 'basicstyles', items : [ 'Bold','Italic','Underline','Strike','RemoveFormat' ] },
+// 	{ name: 'clipboard', items : [ 'Cut','Copy','Paste','PasteText','-','Undo','Redo' ] },
+// 	{ name: 'styles', items : [ 'Format' ] },
+// 	{ name: 'paragraph', items : [ 'NumberedList','BulletedList' ] },
+// 	{ name: 'links', items : [ 'Link','Unlink' ] },
+// 	{ name: 'insert', items : [ 'Image','HorizontalRule'] },
+// 	{ name: 'tools', items : [ 'Source', 'Maximize' ] }
+// ";

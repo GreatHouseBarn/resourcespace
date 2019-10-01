@@ -11,5 +11,6 @@ $librarylink_auto_refresh_collection_top=10; //refresh seconds.... 0 to disable
 $librarylink_auto_refresh_collection_bottom=10; //refresh seconds.... 0 to disable
 
 $librarylink_api_user_id=10;
-
 $librarylink_record_keywords_field=88; //which field id holds our library link related records keywords?
+
+$librarylink_iframe_config_override="config.iframe.php";

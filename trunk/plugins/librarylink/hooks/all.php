@@ -26,6 +26,27 @@ if($librarylink_hook_debug_enable and !function_exists('hook_modifier'))
 //     lldebug($params);
 //     }
 
+function HookLibraryLinkAllInitialise()
+    {
+    lldebug("-----------------------------------------------------------");
+    lldebug("Initialise");
+    if(!$iframe_type=librarylink_get_iframe_parameters()) return;
+    global $librarylink_iframe_config_override;
+    if(@file_exists(__DIR__.'/../config/'.$librarylink_iframe_config_override))
+        {
+        include_once(__DIR__.'/../config/'.$librarylink_iframe_config_override);
+        if(isset($iframe_config[$iframe_type])) //find the override config array with our name
+            {
+            foreach($iframe_config[$iframe_type] as $k=>$v) //and set these values into global variables
+                {
+                    global $$k;
+                    $$k=$v;
+                    lldebug(sprintf("Setting config variable: \$%s to value: '%s'",$k,$v));
+                }
+            }
+        }
+    }
+
 function HookLibrarylinkAllAfterregisterplugin($params='')
     {
     if($params=='librarylink')

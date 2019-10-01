@@ -12,7 +12,7 @@
 
 <h1>LibraryLink RS IFrame Test</h1>
 
-<iframe width="100%" height=900 src="https://resourcespace.ateb.co.uk/">No IFrame Support</iframe>
+<iframe width="100%" height=900 src="https://resourcespace.ateb.co.uk/?ll_iframe=small">No IFrame Support</iframe>
 
 </body>
 </html>
