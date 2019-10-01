@@ -2,7 +2,7 @@
 
 For best results, this area should be hosted on another domain which is completely separate to the one on which Librarylink/resourcespace is running.
 
-*At the moment this is on <https://llclient.ateb.wales>*
+*At the moment this is on <https://llclient.ateb.wales/>*
 
 1) Librarylink API testing page
 

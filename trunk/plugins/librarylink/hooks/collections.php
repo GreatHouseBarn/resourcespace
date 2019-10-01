@@ -3,7 +3,17 @@ include_once(__DIR__."/../../../librarylink/api/include/api_functions.php");
 
 function HookLibrarylinkCollectionsThumbsmenu()
     {
-    //print "<p>Thumbsmenu</p>";
+    global $userref,$usercollection;
+    $collections=get_user_collections($userref);
+    //lldebug($collections);
+    $clist=array();
+    foreach($collections as $collection) $clist[]=$collection['ref'];
+    if(!in_array($usercollection,$clist)) //if we no longer have the collection shared with us then change the collection window to My Collection
+        {
+        print "<script>jQuery( document ).ready(function() { ChangeCollection(1,''); }); </script>\n";
+        //set_user_collection($userref,1); //set to My Collection
+        //$usercollection=1;
+        }
     return false;
     }
 

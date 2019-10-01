@@ -730,6 +730,14 @@ function librarylink_get_link_parameters()
         global $links_changed;
         $links=array();
         $links_changed=false;
+        //special case first - ll_type is given but is empty. Here we remove our cookies.
+        if(isset($_REQUEST['ll_type']) and $_REQUEST['ll_type']=='')
+            {
+                rs_setcookie('ll_type','',0,"","",false,false);
+                rs_setcookie('ll_keys','',0,"","",false,false);
+                return $links;               
+            }
+
         //get or post values given for ll_type and ll_keys ?
         if(isset($_REQUEST['ll_type'])) $ll_type=trim($_REQUEST['ll_type']); else $ll_type='';
         if(isset($_REQUEST['ll_keys'])) $ll_keys=trim($_REQUEST['ll_keys']); else $ll_keys='';
