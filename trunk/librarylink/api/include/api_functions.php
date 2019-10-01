@@ -572,7 +572,7 @@ function librarylink_get_linked_collection($xg_type, $xg_key)
     $result=sql_query($sql);
     if(isset($result[0]['collection_ref']) and $result[0]['ref']>0)
         {
-            $resources=sql_array(sprintf("SELECT resource as value from librarylink_collection left join collection_resource on collection_ref=collection where xgtype='%s' and xgkey='%s' ORDER BY sortorder asc,date_added desc",escape_check($xg_type),escape_check($xg_key)));
+            $resources=sql_array(sprintf("select resource as value from librarylink_collection left join collection_resource on collection_ref=collection where xgtype='%s' and xgkey='%s' ORDER BY sortorder asc,date_added desc",escape_check($xg_type),escape_check($xg_key)));
             $result[0]['resource_count']=count($resources);
             $result[0]['resources']=$resources;
             return $result[0];
@@ -587,12 +587,27 @@ function librarylink_get_linked_collection_by_id($ref)
     $result=sql_query($sql);
     if(isset($result[0]['collection_ref']) and $result[0]['ref']>0)
         {
-            $resources=sql_array(sprintf("SELECT resource as value from librarylink_collection left join collection_resource on collection_ref=collection where collection_ref=%s ORDER BY sortorder asc,date_added desc",$ref));
+            $resources=sql_array(sprintf("select resource as value from librarylink_collection left join collection_resource on collection_ref=collection where collection_ref=%s ORDER BY sortorder asc,date_added desc",$ref));
             $result[0]['resource_count']=count($resources);
             $result[0]['resources']=$resources;
             return $result[0];
         }
     return false;
+    }
+
+function librarylink_get_linked_collections_by_resource($ref)
+    {
+        if(!preg_match('/^[0-9]+$/',$ref)) return false;
+        $sql=sprintf("select collection_ref,xgtype,xgkey,label,ref,name,description,last_update FROM librarylink_collection left join collection on collection_ref=ref left join collection_resource on collection_ref=collection WHERE resource=%s",$ref);
+        $result=sql_query($sql);
+        if(!count($result)) return false;
+        for($i=0;$i<count($result);$i++)
+            {
+            $resources=sql_array(sprintf("select resource as value from librarylink_collection left join collection_resource on collection_ref=collection where collection_ref=%s ORDER BY sortorder asc,date_added desc",$result[$i]['ref']));
+            $result[$i]['resource_count']=count($resources);
+            $result[$i]['resources']=$resources;
+            }
+        return $result;
     }
 
 function librarylink_create_linked_collection($xg_type, $xg_key, $label='')

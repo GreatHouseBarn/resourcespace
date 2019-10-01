@@ -79,7 +79,8 @@ function HookLibrarylinkAllAdd_bottom_in_page_nav_left()
     global $librarylink_auto_refresh_collection_top, $lang, $baseurl, $collection_allow_creation;
     if(!checkperm("LL")) { return true; } //no LibraryLink permissions
     if (checkperm("b") || !$collection_allow_creation) { return true; }; //no bottom collection bar or create collection permissions
-
+    lldebug("-----------------------------------------------------------");
+    lldebug("Add_bottom_in_page_nav_left");
     $timer=false;
     if(isset($_REQUEST['search']))
         {
@@ -122,7 +123,8 @@ function HookLibrarylinkAllAdd_bottom_in_page_nav_left()
 
 function HookLibraryLinkAllBeforedeleteresourcefromdb($ref)
     {
-        lldebug("Hook: Beforedeleteresourcefromdb was called.");
+        lldebug("-----------------------------------------------------------");
+        lldebug("Beforedeleteresourcefromdb");
         librarylink_delete_links_by_ref($ref, false);
         return true;
     }
