@@ -393,6 +393,19 @@ function librarylink_remove_keyword_from_resource($ref,$usercollection)
         }              
     }
 
+//make sure that a resource archive state is set to Active
+function librarylink_ensure_resource_active($ref)
+    {
+    $resource = get_resource_data($ref);
+    if($resource['archive']!==0) 
+        {
+        update_archive_status($ref, 0);
+        lldebug(sprintf("Resource: %s was made Active",$ref));
+        return true;
+        }
+    return false;
+    }
+
 /* These functions manage the specific librarylink collections for each record (xgtype/xgkey)
 */
 function librarylink_get_linked_collection($xg_type, $xg_key)
@@ -613,13 +626,15 @@ function librarylink_get_link_parameters()
 
 // end collection functions
 
+//iframe functions
+
 function librarylink_get_iframe_parameters()
     {
     $iframe_changed=false;
     //special case first - ll_iframe is given but is empty. Here we remove our cookies.
     if(isset($_REQUEST['ll_iframe']) and $_REQUEST['ll_iframe']=='')
         {
-            setcookie('ll_iframe','',0,"","",false,false);
+            rs_setcookie('ll_iframe','',0,"","",false,false);
             return false;
         }
     //get or post values given for ll_iframe ?
@@ -632,7 +647,7 @@ function librarylink_get_iframe_parameters()
             } else $iframe_changed=true;                             //if we never had a cookie value then iframe changed
         if($iframe_changed) //iframe changed so set or reset cookies
             {
-            setcookie('ll_iframe',$ll_iframe,0,"","",false,false);
+            rs_setcookie('ll_iframe',$ll_iframe,0,"","",false,false);
             }
         } else { //no links given in get or post so check cookies
         if(isset($_COOKIE['ll_iframe'])) $ll_iframe=$_COOKIE['ll_iframe']; else $ll_iframe=false;

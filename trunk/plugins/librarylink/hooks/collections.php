@@ -19,7 +19,8 @@ function HookLibrarylinkCollectionsThumbsmenu()
 
 function HookLibrarylinkCollectionsBeforecollectiontoolscolumn()
     {
-    global $collection_allow_creation,$lang,$usercollection,$librarylink_collection_selected,$librarylink_auto_refresh_collection_bottom,$baseurl;
+    global $collection_allow_creation,$lang,$usercollection,$librarylink_collection_selected;
+    global $librarylink_auto_refresh_collection_bottom,$baseurl,$librarylink_resource_archive_updated;
     lldebug("-----------------------------------------------------------");
     lldebug("Beforecollectiontoolscolumn");
     if(!checkperm("LL")) { return true; } //no LibraryLink permissions
@@ -33,6 +34,8 @@ function HookLibrarylinkCollectionsBeforecollectiontoolscolumn()
         if($collection=librarylink_get_linked_collection_by_id($usercollection))
             {
             printf('<div class="ll_col_desc">%s</div>',nl2br(sprintf($lang['librarylink_collection_shortdesc'],$collection['xgtype'],$collection['label'],$collection['xgkey'])));
+            if($librarylink_resource_archive_updated) printf("<script>jQuery( document ).ready(function(){ setTimeout(function(){alert('%s');},500); });</script>",$lang['librarylink_resource_archive_updated']);
+            
             if($librarylink_auto_refresh_collection_bottom>0) 
                 {
                 printf("
@@ -67,6 +70,19 @@ function HookLibrarylinkCollectionsPrevent_running_render_actions()
     global $librarylink_collection_selected;
     //lldebug("Prevent_running_render_actions");
     return $librarylink_collection_selected; //disable actions if in  LibraryLink collection
+    }
+
+function HookLibrarylinkCollectionsPreaddtocollection()
+    {
+    global $collection_allow_creation,$usercollection,$add,$librarylink_resource_archive_updated;
+    if(!checkperm("LL")) { return; } //no LibraryLink permissions
+    if (checkperm("b") || !$collection_allow_creation) { return; }; //no bottom collection bar or create collection permissions
+    lldebug("-----------------------------------------------------------");
+    lldebug(sprintf("Preaddtocollection: %s, resource: %s",$usercollection,$add));
+    if(librarylink_is_linked_collection($usercollection))
+        {
+        $librarylink_resource_archive_updated=librarylink_ensure_resource_active($add);
+        }
     }
 
 function HookLibrarylinkCollectionsPostaddtocollection()

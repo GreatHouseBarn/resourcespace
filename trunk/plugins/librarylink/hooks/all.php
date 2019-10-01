@@ -1,4 +1,5 @@
 <?php
+include_once(__DIR__."/../../../include/general.php");
 include_once(__DIR__."/../../../include/collections_functions.php");
 include_once(__DIR__."/../../../librarylink/api/include/api_functions.php");
 

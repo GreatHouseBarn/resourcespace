@@ -12,7 +12,7 @@ $lang["librarylink_currentcollection"]="Current LibraryLink collection:";
 $lang["librarylink_collection_last_updated"]="This collection was last updated on %s";
 $lang['librarylink_confirm_resource_delete1']="Warning!!<br />The resource you are about to delete belongs to %s Librarylink collection.";
 $lang['librarylink_confirm_resource_delete2']="Warning!!<br />The resource you are about to delete belongs to %s Librarylink collections.";
-
+$lang['librarylink_resource_archive_updated']="You added a resource which was not Active to a LibraryLink record collection. This resource has now been made Active.";
 
 # these are copied from core and have had ResourceSpace replaced by LibraryLink
 
