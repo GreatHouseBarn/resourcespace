@@ -21,12 +21,6 @@ if($librarylink_hook_debug_enable and !function_exists('hook_modifier'))
         }
     }
 
-// function HookLibrarylinkAllHandleuserref($params)
-//     {
-//     lldebug("Handleuserref");
-//     lldebug($params);
-//     }
-
 function HookLibraryLinkAllInitialise()
     {
     lldebug("-----------------------------------------------------------");
@@ -156,8 +150,8 @@ function HookLibrarylinkAllBefore_footer_always()
         print "<div class=\"ll_footer\">LibraryLink is powered by ResourceSpace</div>";
     }
 
-function HookLibraryLinkAllModified_collections($params)
-    {
-        lldebug("Modified_collections");
-        lldebug($params);
-    }
+// function HookLibraryLinkAllModified_collections($params)
+//     {
+//         lldebug("Modified_collections");
+//         lldebug($params);
+//     }
