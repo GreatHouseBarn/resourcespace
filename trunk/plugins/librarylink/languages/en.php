@@ -9,6 +9,7 @@ $lang['librarylink_collection_name']="%s - %s (LibraryLink)";
 $lang['librarylink_collection_shortdesc']="LibraryLink Type: '%s',\nRecord Name: '%s',\nKey: '%s'";
 $lang['librarylink_collection_description']="This is a LibraryLink collection which is holding resources that are linked to: Record Type: '%s', Record Name: '%s', Record Key: '%s'";
 $lang["librarylink_currentcollection"]="Current LibraryLink collection:";
+$lang["librarylink_collection_last_updated"]="This collection was last updated on %s";
 
 # these are copied from core and have had ResourceSpace replaced by LibraryLink
 

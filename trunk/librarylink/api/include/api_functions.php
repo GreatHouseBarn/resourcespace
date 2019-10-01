@@ -150,6 +150,7 @@ function librarylink_add_resource_link($ref, $xg_type, $xg_key, $label='', $xg_r
             }
         db_end_transaction();
         librarylink_operation_log($ref,$xg_type, $xg_key, $xg_rank,'Add resource to record');
+        librarylink_update_collection_timestamp($collection['ref']);
         }
     $collection=librarylink_get_linked_collection_by_id($collection['ref']);
     return $collection;
@@ -196,6 +197,7 @@ function librarylink_delete_resource_link($ref, $xg_type, $xg_key, $delete_keywo
         if($collection['resource_count']>0) { librarylink_set_ranks_by_collection_id($collection['ref']); } //reorder the ranks
         db_end_transaction();
         librarylink_operation_log($ref,$xg_type, $xg_key, 0,'Remove resource from record');
+        librarylink_update_collection_timestamp($collection['ref']);
         }
     $collection=librarylink_get_linked_collection_by_id($collection['ref']);
     return $collection;
@@ -254,6 +256,7 @@ function librarylink_modify_resource_link_rank($ref, $xg_type, $xg_key, $xg_rank
         if($collection['resource_count']>1) { librarylink_set_ranks_by_collection_id($collection['ref']); } //reorder the ranks
         db_end_transaction();
         librarylink_operation_log($ref,$xg_type, $xg_key, $xg_rank,'Change resource rank');
+        librarylink_update_collection_timestamp($collection['ref']);
         }
     $collection=librarylink_get_linked_collection_by_id($collection['ref']);
     return $collection;
@@ -565,11 +568,12 @@ function librarylink_get_linked_collection($xg_type, $xg_key)
     $xg_type=trim($xg_type);
     $xg_key=trim($xg_key);
     if($xg_type=='' or $xg_key=='') return false;
-    $sql=sprintf("select collection_ref,xgtype,xgkey,label,ref,name,description,count(resource) as resource_count from librarylink_collection left join collection on collection_ref=ref left join collection_resource on ref=collection where xgtype='%s' and xgkey='%s'",escape_check($xg_type),escape_check($xg_key));
+    $sql=sprintf("select collection_ref,xgtype,xgkey,label,ref,name,description,last_update from librarylink_collection left join collection on collection_ref=ref where xgtype='%s' and xgkey='%s'",escape_check($xg_type),escape_check($xg_key));
     $result=sql_query($sql);
     if(isset($result[0]['collection_ref']) and $result[0]['ref']>0)
         {
             $resources=sql_array(sprintf("SELECT resource as value from librarylink_collection left join collection_resource on collection_ref=collection where xgtype='%s' and xgkey='%s' ORDER BY sortorder asc,date_added desc",escape_check($xg_type),escape_check($xg_key)));
+            $result[0]['resource_count']=count($resources);
             $result[0]['resources']=$resources;
             return $result[0];
         }
@@ -579,11 +583,12 @@ function librarylink_get_linked_collection($xg_type, $xg_key)
 function librarylink_get_linked_collection_by_id($ref)
     {
     if(!preg_match('/^[0-9]+$/',$ref)) return false;
-    $sql=sprintf("select collection_ref,xgtype,xgkey,label,ref,name,description,count(resource) as resource_count from librarylink_collection left join collection on collection_ref=ref left join collection_resource on ref=collection where collection_ref=%s",$ref);
+    $sql=sprintf("select collection_ref,xgtype,xgkey,label,ref,name,description,last_update from librarylink_collection left join collection on collection_ref=ref where collection_ref=%s",$ref);
     $result=sql_query($sql);
     if(isset($result[0]['collection_ref']) and $result[0]['ref']>0)
         {
             $resources=sql_array(sprintf("SELECT resource as value from librarylink_collection left join collection_resource on collection_ref=collection where collection_ref=%s ORDER BY sortorder asc,date_added desc",$ref));
+            $result[0]['resource_count']=count($resources);
             $result[0]['resources']=$resources;
             return $result[0];
         }
@@ -623,7 +628,7 @@ function librarylink_create_linked_collection($xg_type, $xg_key, $label='')
             {
             $sql=sprintf("delete from librarylink_collection where xgtype='%s' and xgkey='%s'",escape_check($xg_type),escape_check($xg_key));
             sql_query($sql);
-            $sql=sprintf("insert into librarylink_collection(collection_ref,xgtype,xgkey,label) values (%s,'%s','%s','%s')",$collection['ref'],escape_check($xg_type),escape_check($xg_key),escape_check($label));
+            $sql=sprintf("insert into librarylink_collection(collection_ref,xgtype,xgkey,label,last_update) values (%s,'%s','%s','%s','%s')",$collection['ref'],escape_check($xg_type),escape_check($xg_key),escape_check($label),microtime(true)*1000);
             sql_query($sql);        
             lldebug(sprintf("Created collection with id: %s for session: %s and request: %s",$collection['ref'],$session,$_SERVER['REQUEST_URI']));
             $collection=librarylink_get_linked_collection($xg_type, $xg_key); 
@@ -637,12 +642,20 @@ function librarylink_create_linked_collection($xg_type, $xg_key, $label='')
         {
         $collection['description']=$description;
         $collection['name']=$name;
-        $sql=sprintf("update librarylink_collection left join collection on collection_ref=ref set name='%s',description='%s',label='%s' where collection_ref=%s",escape_check($collection['name']),escape_check($collection['description']),escape_check($collection['label']),$collection['ref']);
+        $sql=sprintf("update librarylink_collection left join collection on collection_ref=ref set name='%s',description='%s',label='%s',last_update='%s' where collection_ref=%s",escape_check($collection['name']),escape_check($collection['description']),escape_check($collection['label']),microtime(true)*1000,$collection['ref']);
         sql_query($sql);        
         lldebug(sprintf("Updated collection with id: %s for session: %s and request: %s",$collection['ref'],$session,$_SERVER['REQUEST_URI']));  
         }
 
     return $collection;
+    }
+
+function librarylink_update_collection_timestamp($collection_id)
+    {
+        $session=isset($_COOKIE['user'])?$_COOKIE['user']:'';
+        $sql=sprintf("update librarylink_collection set last_update='%s' where collection_ref=%s",microtime(true)*1000,$collection_id);
+        sql_query($sql);        
+        lldebug(sprintf("Updated collection with id: %s for session: %s and request: %s",$collection_id,$session,$_SERVER['REQUEST_URI'])); 
     }
 
 function librarylink_add_user_to_linked_collection($collection_id)

@@ -6,6 +6,6 @@ include '../../include/authenticate.php';
 $c=getvalescaped('c', '',true);
 if(preg_match('/^[0-9]+/',$c))
     {
-    $d=sql_value(sprintf("SELECT max(date) as value FROM `collection_log` WHERE user=%s and collection=%s",$userref,$c),'0000-00-00 00:00:00');
+    $d=sql_value(sprintf("SELECT last_update as value FROM `librarylink_collection` WHERE collection_ref=%s",$c),'0000-00-00 00:00:00');
     print $d;
-    } else print '0000-00-00 00:00:00';
+    } else print 0;

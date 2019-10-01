@@ -76,21 +76,47 @@ function HookLibrarylinkAllAfterregisterplugin($params='')
 
 function HookLibrarylinkAllAdd_bottom_in_page_nav_left()
     {
-    global $librarylink_auto_refresh_collection_top;
-    if(isset($_GET['search']))
+    global $librarylink_auto_refresh_collection_top, $lang, $baseurl, $collection_allow_creation;
+    if(!checkperm("LL")) { return true; } //no LibraryLink permissions
+    if (checkperm("b") || !$collection_allow_creation) { return true; }; //no bottom collection bar or create collection permissions
+
+    $timer=false;
+    if(isset($_REQUEST['search']))
         {
-        $search=$_GET['search'];
+        $search=$_REQUEST['search'];
         if(preg_match('/^\!collection([0-9]+)/',$search,$m))
             {
             $search_collection=$m[1];
             if(librarylink_is_linked_collection($search_collection))
                 {
-                print sql_value(sprintf("select description as value from collection where ref=%s",$search_collection),'');
-                if($librarylink_auto_refresh_collection_top>0) printf("
-                <script>jQuery( document ).ready(function(){setTimeout(function(){UpdateResultOrder();},%s);});</script>\n",$librarylink_auto_refresh_collection_top*1000);
+                $collection=librarylink_get_linked_collection_by_id($search_collection);
+                printf("<div>%s</div>\n",$collection['description']);
+                printf("<div>%s</div>\n",sprintf($lang['librarylink_collection_last_updated'],date('D, jS M Y H:i:s',$collection['last_update'])));
+                if($librarylink_auto_refresh_collection_top>0)
+                    {
+                     printf("
+                    <script>var ll_s_ctime=%s;
+                    var ll_s_timer;
+                    clearTimeout(ll_s_timer);
+                    function ll_check_s_ctime() {
+                        clearTimeout(ll_s_timer);
+                        jQuery.get('%s?c=%s',function(d,s) { if(d>ll_s_ctime) { UpdateResultOrder(); } else { ll_s_timer=setTimeout(ll_check_s_ctime,%s); }; });
+                    } 
+                    ll_s_timer=setTimeout(ll_check_s_ctime,%s);
+                    </script>\n",$collection['last_update'],
+                    $baseurl.'/plugins/librarylink/ajax.php',
+                    $search_collection,
+                    $librarylink_auto_refresh_collection_top*1000,
+                    $librarylink_auto_refresh_collection_top*1000);
+                    $timer=true;
+                    }                
                 }
             }
         }
+    if(!$timer and $librarylink_auto_refresh_collection_top>0) printf("
+                    <script>var ll_s_timer;
+                    clearTimeout(ll_s_timer);
+                    </script>\n");     
     return true;
     }
 

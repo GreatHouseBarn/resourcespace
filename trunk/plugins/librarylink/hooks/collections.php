@@ -9,11 +9,13 @@ function HookLibrarylinkCollectionsThumbsmenu()
 
 function HookLibrarylinkCollectionsBeforecollectiontoolscolumn()
     {
-    global $collection_allow_creation,$lang,$usercollection,$librarylink_collection_selected,$librarylink_auto_refresh_collection_bottom;
+    global $collection_allow_creation,$lang,$usercollection,$librarylink_collection_selected,$librarylink_auto_refresh_collection_bottom,$baseurl;
     lldebug("-----------------------------------------------------------");
     lldebug("Beforecollectiontoolscolumn");
     if(!checkperm("LL")) { return true; } //no LibraryLink permissions
     if (checkperm("b") || !$collection_allow_creation) { return true; }; //no bottom collection bar or create collection permissions
+    
+    $timer=false;
     $librarylink_collection_selected=false;
     if(librarylink_is_linked_collection($usercollection))
         {
@@ -21,11 +23,31 @@ function HookLibrarylinkCollectionsBeforecollectiontoolscolumn()
         if($collection=librarylink_get_linked_collection_by_id($usercollection))
             {
             printf('<div class="ll_col_desc">%s</div>',nl2br(sprintf($lang['librarylink_collection_shortdesc'],$collection['xgtype'],$collection['label'],$collection['xgkey'])));
+            if($librarylink_auto_refresh_collection_bottom>0) 
+                {
+                printf("
+                <script>var ll_c_ctime=%s;
+                var ll_c_timer;
+                clearTimeout(ll_c_timer);
+                function ll_check_c_ctime() {
+                    clearTimeout(ll_c_timer);
+                    jQuery.get('%s?c=%s',function(d,s) { if(d>ll_c_ctime) { UpdateCollectionDisplay(''); } else { ll_c_timer=setTimeout(ll_check_c_ctime,%s); }; });
+                } 
+                ll_c_timer=setTimeout(ll_check_c_ctime,%s);
+                </script>\n",$collection['last_update'],
+                $baseurl.'/plugins/librarylink/ajax.php',
+                $usercollection,
+                $librarylink_auto_refresh_collection_bottom*1000,
+                $librarylink_auto_refresh_collection_bottom*1000);
+                $timer=true;
+                } 
             }
-        if($librarylink_auto_refresh_collection_bottom) printf("
-        <script>setTimeout(function(){UpdateCollectionDisplay('');},%s);</script>\n",$librarylink_auto_refresh_collection_bottom*1000); 
         return false;
         }
+    if(!$timer and $librarylink_auto_refresh_collection_bottom>0) printf("
+        <script>var ll_c_timer;
+        clearTimeout(ll_c_timer);
+        </script>\n");
     return true;
     }
 
@@ -65,6 +87,22 @@ function HookLibrarylinkCollectionsPostremovefromcollection()
         }
     }
 
+function HookLibrarylinkCollectionsPostchangecollection()
+    {
+    global $collection_allow_creation,$usercollection;
+    if(!checkperm("LL")) { return; } //no LibraryLink permissions
+    if (checkperm("b") || !$collection_allow_creation) { return; }; //no bottom collection bar or create collection permissions
+    lldebug("-----------------------------------------------------------");
+    lldebug("Postchangecollection:".$usercollection);
+    if(librarylink_is_linked_collection($usercollection))
+        {        
+        $reorder=getvalescaped("reorder",false);
+        if ($reorder)
+            {
+            librarylink_update_collection_timestamp($usercollection);
+            }
+        }
+    }
 
 // function HookLibrarylinkCollectionsAftercollectionsrenderactions()
 //     {
