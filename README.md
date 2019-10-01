@@ -6,7 +6,7 @@ Web-based successor to LibraryLink, for Digital Asset Management linked to inven
 
 Currently looking at adapting a DAM application called
 
-# resourcespace
+# ResourceSpace
 Fork of svn co http://svn.resourcespace.com/svn/rs/trunk/
 
 with our own proprietry plugins for LibraryLink functionality.
