@@ -1,0 +1,4 @@
+collection_ref,int(11),NO,PRI,,
+xgtype,varchar(255),NO,PRI,,
+xgkey,varchar(255),NO,PRI,,
+label,varchar(255),NO,,,

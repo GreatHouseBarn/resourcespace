@@ -3,3 +3,4 @@ author: ESDM Ltd
 version: 0.1
 desc: [Advanced] Adds the capability to link resources to external records in CMSi, CAMS and HBSMR
 category: user interface
+default-priority: 9999

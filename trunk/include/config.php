@@ -12,11 +12,25 @@ $mysql_server = 'localhost';
 $mysql_username = 'resourcespace';
 $mysql_password = 'R350urc3$pac3';
 $mysql_db = 'resourcespace';
-
 $mysql_bin_path = '/usr/bin';
+
+$applicationname="LibraryLink"; # The name of your implementation / installation (e.g. 'MyCompany Resource System')
+$applicationdesc=""; # Subtitle (i18n translated) if $header_text_title=true;
+$header_favicon="gfx/interface/favicon.png";
+#replace header logo with text, application name and description
+$header_text_title=false;
+# Is the logo a link to the home page?
+$header_link=true;
+# Header size class. Options are HeaderSmall, HeaderMid, HeaderLarge.
+$header_size="HeaderMid";
+# Header includes username to right of user menu icon
+$header_include_username=true;
 
 # Base URL of the installation
 $baseurl = 'https://resourcespace.ateb.co.uk';
+
+# $xframe_options - set this to DENY (prevent all), SAMEORIGIN or ALLOW-FROM with a URL to allow site to be used in an iframe. To disable completely set to "";
+$xframe_options = "allow-from https://llclient.ateb.wales/";
 
 # Email settings
 $email_notify = 'simon@ateb.co.uk';
@@ -40,7 +54,7 @@ $calibre_path="/usr/bin";
 $calibre_extensions=array("epub","mobi","lrf","pdb","chm","cbr","cbz");
 
 
-$debug_log_location="/home/simona/resourcespace/resourcespace.log";
+$debug_log_location="/home/simona/resourcespace/logs/resourcespace.log";
 # Suppress SQL information in the debug log?
 $suppress_sql_log = true;
 $debug_log=false;
@@ -68,7 +82,16 @@ $offline_job_prefixes = array("ffmpeg","im-convert","im-mogrify","ghostscript","
 #  - This setting may be overridden if previews are required at upload time e.g. if Google Vision facial recognition is configured with a dependent field
 $enable_thumbnail_creation_on_upload = false;
 
+$collections_footer = true;
+$collections_delete_empty=true;
+$sharing_userlists=true; // enable users to save/select predefined lists of users/groups when sharing collections and resources.
 
+# All user permissions for the dash are revoked and the dash admin can manage a single dash for all users. 
+# Only those with admin privileges can modify the dash and this must be done from the Team Centre > Manage all user dash tiles (One dash for all)
+$managed_home_dash = true;
+# Allows Dash Administrators to have their own dash whilst all other users have the managed dash ($managed_home_dash must be on)
+$unmanaged_home_dash_admins = true;
+$no_welcometext = true;
 /*
 
 New Installation Defaults
@@ -209,3 +232,45 @@ $relate_on_upload_default=false;
 #Size of the related resource previews on the resource page. Usually requires some restyling (#RelatedResources .CollectionPanelShell)
 #Takes the preview code such as "col","thm"
 $related_resource_preview_size="col";
+
+
+# Create file checksums?
+$file_checksums=true;
+
+# Calculate checksums on first 50k and size if true or on the full file if false
+$file_checksums_50k = true;
+
+# Block duplicate files based on checksums? (has performance impact). May not work reliably with $file_checksums_offline=true unless checksum script is run frequently. 
+$file_upload_block_duplicates=true;
+
+# checksums will not be generated in realtime; a background cron job must be used
+# recommended if files are large, since the checksums can take time
+$file_checksums_offline = true;
+
+
+
+$use_pdfjs_viewer = true;
+
+
+
+# Length of a user session. This is used for statistics (user sessions per day) and also for auto-log out if $session_autologout is set.
+$session_length = 86400;
+
+# Automatically log a user out at the end of a session (a period of idleness equal to $session_length above).
+$session_autologout = true;
+
+# Randomised session hash?
+# Setting to 'true' means each new session is completely unique each login. This may be more secure as the hash is less easy to guess but means that only one user can use a given user account at any one time.
+$randomised_session_hash=true;
+
+// $enable_ckeditor = true;
+// $ckeditor_toolbars="'Styles', 'Bold', 'Italic', 'Underline','FontSize', 'RemoveFormat', 'TextColor','BGColor'";
+// $ckeditor_content_toolbars="
+// 	{ name: 'basicstyles', items : [ 'Bold','Italic','Underline','Strike','RemoveFormat' ] },
+// 	{ name: 'clipboard', items : [ 'Cut','Copy','Paste','PasteText','-','Undo','Redo' ] },
+// 	{ name: 'styles', items : [ 'Format' ] },
+// 	{ name: 'paragraph', items : [ 'NumberedList','BulletedList' ] },
+// 	{ name: 'links', items : [ 'Link','Unlink' ] },
+// 	{ name: 'insert', items : [ 'Image','HorizontalRule'] },
+// 	{ name: 'tools', items : [ 'Source', 'Maximize' ] }
+// ";

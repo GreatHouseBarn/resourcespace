@@ -1,0 +1,19 @@
+.ll_footer {
+    background-color: white;
+    color: #600000;
+    position: fixed;
+    right: 0;
+    bottom: 0;
+}
+
+.ll_col_desc {
+    font-size: 0.7em;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    padding-left: 5px;
+    border: 1px solid silver;
+}
+
+.ll_delete_warning {
+    color: #600000;    
+}

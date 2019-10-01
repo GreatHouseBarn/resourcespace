@@ -1,1 +1,1 @@
-librarylink_log,0,PRIMARY,1,id,A,0,,,,BTREE,,
+librarylink_log,0,PRIMARY,1,id,A,1519,,,,BTREE,,

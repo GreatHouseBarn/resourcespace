@@ -34,7 +34,7 @@ setup_user(get_user(get_user_by_username($user)));
 debug("API: set up user '{$user}' signed with '{$sign}'");
 
 # Run the requested query
-echo execute_api_call($query);
+echo librarylink_execute_api_call($query);
 debug("API: finished execute_api_call({$query});");
 
 /*
